@@ -1,0 +1,5 @@
+Atlas DB Creds
+
+UN: ms3071687_db_user
+
+Pass: jnvzO7MrUdBTljRr

@@ -1,0 +1,15 @@
+admin@email.com
+
+123
+
+manager@email.com
+
+123
+
+receptionist@email.com
+
+123
+
+housekeeper@email.com
+
+123
