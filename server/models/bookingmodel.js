@@ -1,40 +1,18 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-  guestFullname: {
-     type: mongoose.Schema.Types.ObjectId,
-     
-     ref: "Guest",
-      required: true 
-    },
-  room: { type: mongoose.Schema.Types.ObjectId, ref: "Room", 
-    required: true
- },
-  bookedBy: { 
-    type: mongoose.Schema.Types.ObjectId, ref: "User" 
-}, 
-  checkInDate: { 
-    type: Date,
-     required: true 
-    },
-  checkOutDate: { 
-    type: Date,
-     required: true
-     },
+  guestName: String,
+  guestEmail: String,
+  guestPhone: String,
+  roomNumber: String,
+  checkInDate: Date,
+  checkOutDate: Date,
+  totalPrice: String,
   status: {
     type: String,
-    enum: ["reserved", "checked-in", "checked-out", "cancelled"],
-    default: "reserved",
-  },
-  totalAmount: { 
-    type: Number 
-},
-  paymentStatus: {
-    type: String,
-    enum: ["pending", "paid"],
-    default: "pending",
-  },
-
+    enum: ['reserved', 'checked_in', 'checked_out', 'cancelled'],
+    default: 'reserved'
+  }
 });
-
 module.exports = mongoose.model("Booking", bookingSchema);
+

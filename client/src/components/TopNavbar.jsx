@@ -2,6 +2,7 @@ import React from 'react'
 import { Bell, Search, Settings } from "lucide-react";
 
 const TopNavbar = () => {
+  const loggedUser = JSON.parse(localStorage.getItem("user"));
   return (
     <>
       <div className="w-full bg-white shadow px-6 py-3 flex items-center justify-between sticky top-0 z-30">
@@ -32,13 +33,13 @@ const TopNavbar = () => {
 
           {/* Profile */}
           <div className="flex items-center gap-2 cursor-pointer">
-            <img
+            {/* <img
               src="#"
               alt="User"
               className="w-9 h-9 rounded-full border"
-            />
+            /> */}
             <span className="hidden sm:inline font-medium text-gray-700">
-              Admin
+              {`Welcome ${loggedUser.name} !`}
             </span>
           </div>
         </div>

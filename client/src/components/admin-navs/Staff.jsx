@@ -1,13 +1,67 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
+import axios from "axios";
+import toast, { Toaster } from 'react-hot-toast';
 
 const Staff = () => {
+    const [staffData, setStaffData] = useState([]);
+    const [editId, setEditId] = useState(null);
+    const [editName, setEditName] = useState("");
+    const [editEmail, setEditEmail] = useState("");
+    const [editStaffRole, setEditStaffRole] = useState("");
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
 
-    const staffData = [
-        { id: 1, name: "Alice Smith", email: "alice@example.com", role: "Manager" },
-        { id: 2, name: "Bob Johnson", email: "bob@example.com", role: "Receptionist" },
-        { id: 3, name: "Carol Davis", email: "carol@example.com", role: "Housekeeping" },
-    ];
+    const fetchStaff = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/getstaff");
+            console.log(response.data);
+            setStaffData(response.data);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    useEffect(() => {
+        fetchStaff();
+    }, [])
+
+    const handleEdit = (staff) => {
+        setEditId(staff._id);
+        setEditName(staff.name);
+        setEditEmail(staff.email);
+        setEditStaffRole(staff.role);
+    }
+
+    const handleSave = async (id) => {
+        try {
+            const response = await axios.put(`http://localhost:3000/updatestaff/${id}`, {
+                editName,
+                editEmail,
+                editStaffRole
+            });
+
+            console.log(response.data);
+            setEditId(null);
+            fetchStaff();
+            toast.success(response.data.message);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    const handleDelete = async (id) => {
+        try {
+            const response = await axios.delete(`http://localhost:3000/deletestaff/${id}`);
+            console.log(response.data);
+            fetchStaff();
+            toast.success(response.data.message);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
         <>
@@ -43,23 +97,96 @@ const Staff = () => {
                                         </th>
                                     </tr>
                                 </thead>
+
                                 <tbody className="bg-white divide-y divide-gray-200 text-black">
-                                    {staffData.map((staff) => (
-                                        <tr key={staff.id}>
-                                            <td className="px-4 py-3">{staff.name}</td>
-                                            <td className="px-4 py-3">{staff.email}</td>
-                                            <td className="px-4 py-3">{staff.role}</td>
+                                    {staffData.map((staff, idx) => (
+                                        <tr key={idx}>
+                                            <td className="px-4 py-3">
+                                                {
+                                                    staff._id == editId ?
+                                                        <input
+                                                            type="text"
+                                                            name="name"
+                                                            className="w-full border px-3 py-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                                            value={editName}
+                                                            onChange={(e) => setEditName(e.target.value)}
+                                                        />
+                                                        :
+                                                        staff.name
+                                                }
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {
+                                                    staff._id == editId ?
+                                                        <input
+                                                            type="email"
+                                                            name="email"
+                                                            className="w-full border px-3 py-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                                            value={editEmail}
+                                                            onChange={(e) => setEditEmail(e.target.value)}
+                                                        />
+                                                        :
+                                                        staff.email
+                                                }
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {
+                                                    staff._id == editId ?
+                                                        <select
+                                                            name="roles"
+                                                            className="w-full border px-3 py-2 rounded text-black bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                                            value={editStaffRole || "Admin"}
+                                                            onChange={(e) => setEditStaffRole(e.target.value)}
+                                                        >
+                                                            <option value="" disabled >Select a role</option>
+                                                            <option value="Manager" >Manager</option>
+                                                            <option value="Receptionist" >Receptionist</option>
+                                                            <option value="Housekeeper" >Housekeeper</option>
+
+                                                        </select>
+                                                        :
+                                                        staff.role
+                                                }
+                                            </td>
                                             <td className="px-4 py-3 text-center space-x-2">
-                                                <button
-                                                    className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                                                >
-                                                    Delete
-                                                </button>
+                                                {
+                                                    staff._id == editId ?
+                                                        <>
+                                                            <button
+                                                                className="inline-block bg-green-500 hover:bg-green-600 text-black px-3 py-1 rounded"
+                                                                onClick={() => handleSave(staff._id)}
+                                                            >
+                                                                Save
+                                                            </button>
+                                                            <button
+                                                                className="inline-block bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-1 rounded"
+                                                                onClick={() => setEditId(null)}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </>
+                                                        :
+                                                        <>
+                                                            {loggedUser.role == "Manager" && staff.role == "Admin" ?
+                                                               ""
+                                                                :
+                                                                <>
+                                                                    <button
+                                                                        className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                                                                        onClick={() => handleEdit(staff)}
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                                                                        onClick={() => handleDelete(staff._id)}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </>}
+                                                        </>
+                                                }
+
                                             </td>
                                         </tr>
                                     ))}
@@ -69,6 +196,10 @@ const Staff = () => {
                     </div>
                 </div>
             </div>
+            <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
         </>
     )
 }

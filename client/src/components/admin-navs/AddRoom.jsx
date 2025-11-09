@@ -1,28 +1,32 @@
+import axios from 'axios';
 import React, { useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast';
 
 const AddRoom = () => {
+    const [roomNumber, setRoomNumber] = useState("");
+    const [roomType, setRoomType] = useState("");
+    const [roomPrice, setRoomPrice] = useState("");
+    const [roomStatus, setRoomStatus] = useState("");
 
-    const [form, setForm] = useState({
-        roomNumber: "",
-        type: "",
-        price: "",
-        status: "Available",
-    });
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm(prev => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // backend call hogi yahan
-        console.log("Creating new room:", form);
-        // reset ya redirect logic
-    };
+        try{
+            const response = await axios.post("http://localhost:3000/addroom", {
+                roomNumber,
+                roomType,
+                roomPrice,
+                roomStatus
+            });
+            setRoomNumber("");
+            setRoomPrice("");
+            console.log(response.data);
+            toast.success(response.data.message);
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+
 
     return (
         <>
@@ -38,42 +42,44 @@ const AddRoom = () => {
                                 <input
                                     type="text"
                                     name="roomNumber"
-                                    value={form.roomNumber}
-                                    onChange={handleChange}
+                                    value={roomNumber}
+                                    onChange={(e) => setRoomNumber(e.target.value)}
                                     className="w-full border px-3 py-2 rounded text-black"
-                                    required
                                 />
                             </div>
                             <div>
                                 <label className="block text-gray-700 mb-1">Type</label>
-                                <input
-                                    type="text"
-                                    name="type"
-                                    value={form.type}
-                                    onChange={handleChange}
+                                <select
+                                    name="status"
+                                    value={roomType}
+                                    onChange={(e) => setRoomType(e.target.value)}
                                     className="w-full border px-3 py-2 rounded text-black"
-                                    required
-                                />
+                                >
+                                    <option value="" disabled>Select Room Type</option>
+                                    <option value="Deluxe Suite">Deluxe Suite</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Suite">Suite</option>
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-gray-700 mb-1">Price</label>
                                 <input
                                     type="number"
                                     name="price"
-                                    value={form.price}
-                                    onChange={handleChange}
+                                    value={roomPrice}
+                                    onChange={(e) => setRoomPrice(e.target.value)}
                                     className="w-full border px-3 py-2 rounded text-black"
-                                    required
                                 />
                             </div>
                             <div>
                                 <label className="block text-gray-700 mb-1">Status</label>
                                 <select
                                     name="status"
-                                    value={form.status}
-                                    onChange={handleChange}
+                                    value={roomStatus}
+                                    onChange={(e) => setRoomStatus(e.target.value)}
                                     className="w-full border px-3 py-2 rounded text-black"
                                 >
+                                    <option value="" disabled>Select Room Status</option>
                                     <option value="Available">Available</option>
                                     <option value="Occupied">Occupied</option>
                                     <option value="Cleaning">Cleaning</option>
@@ -84,12 +90,16 @@ const AddRoom = () => {
                                 type="submit"
                                 className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded"
                             >
-                                Create Room
+                                Add Room
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
+            <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
         </>
     )
 }

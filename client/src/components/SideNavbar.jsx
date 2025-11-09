@@ -22,8 +22,6 @@ const SideNavbar = ({ logoutUser }) => {
 
   const loggedUser = JSON.parse(localStorage.getItem("user"));
 
-  console.log(loggedUser.role);
-
   return (
     <div className="w-64 bg-white h-screen border-r p-4 flex flex-col overflow-y-auto">
       <div className="text-2xl font-bold text-gray-800 mb-6 px-2">
@@ -163,9 +161,6 @@ const SideNavbar = ({ logoutUser }) => {
       </div>
 
       : ""}
-
-
-      {}
 
       {/* STAFF SECTION */}
 
