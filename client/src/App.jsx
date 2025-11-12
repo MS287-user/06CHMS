@@ -38,6 +38,7 @@ import Login from "./pages/Login";
 import AppLayout from "./AppLayout";
 import Register from "./pages/Register";
 import { useState } from "react";
+import EditReservation from "./components/admin-navs/EditReservation";
 
 const App = () => {
   const [loggedUser, setLoggedUser] = useState(localStorage.getItem("user") || "");
@@ -70,6 +71,7 @@ const App = () => {
             <Route path="/dashboard/staff/addstaff" element={<AddStaff />} />
             <Route path="/dashboard/rooms/addroom" element={<AddRoom />} />
             <Route path="/dashboard/reservation/addreservation" element={<AddReservation />} />
+            <Route path="/dashboard/reservation/editreservation/:id" element={<EditReservation />} />
             <Route path="/dashboard/checkinout/addcheckinout" element={<AddCheckInOut />} />
             <Route path="/dashboard/billing/generateinvoice" element={<GenerateInvoice />} />
             <Route path="/dashboard/housekeeping/addnewtask" element={<AddNewTask />} />

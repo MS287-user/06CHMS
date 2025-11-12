@@ -130,12 +130,90 @@ app.post("/addreservation", async (req, resp) => {
     try {
         const { guestName, guestEmail, guestPhone, roomNumber, checkInDate, checkOutDate, totalPrice } = req.body;
         await booking.insertOne({ guestName, guestEmail, guestPhone, roomNumber, checkInDate, checkOutDate, totalPrice });
+        
         resp.status(200).send({ message: "Reservation Added" })
     }
     catch (err) {
         resp.status(404).send({ message: err.message });
     }
 })
+
+// Get Reservation
+app.get("/getreservation", async (req, resp) => {
+    try{
+        const reservationData = await booking.find();
+        resp.status(200).send(reservationData);
+    }
+    catch(err){
+        resp.status(404).send({ message: err.message });
+    }
+})
+
+// Getting Reservation By Id
+app.get("/getreservation/:id", async (req, resp) => {
+    try{
+        const id = req.params.id;
+        const reservationData = await booking.findOne({_id: id});
+        resp.status(200).send(reservationData);
+    }
+    catch(err){
+        resp.status(404).send({ message: err.message });
+    }
+})
+
+// Update Reservation
+app.put("/updatereservation/:id", async (req, resp) => {
+    try{
+        const id = req.params.id;
+        const { editGuestName, editGuestEmail, editGuestPhone, editRoomNumber, editCheckInDate, editCheckOutDate, totalPrice, editBookingStatus } = req.body;
+        
+        await booking.updateOne({_id: id}, {$set: { guestName: editGuestName, guestEmail: editGuestEmail, guestPhone: editGuestPhone, roomNumber: editRoomNumber, checkInDate: editCheckInDate, checkOutDate: editCheckOutDate, totalPrice, status: editBookingStatus }});
+
+        const selectedRoom = await room.findOne({roomNumber: editRoomNumber});
+        
+        if(selectedRoom){
+            if(editBookingStatus == "Checked-In"){
+                selectedRoom.roomStatus = "Occupied";
+                await selectedRoom.save();
+            }
+            else if(editBookingStatus == "Checked-Out"){
+                selectedRoom.roomStatus = "Cleaning";
+                await selectedRoom.save();
+            }
+        } 
+
+        resp.status(200).send({ message: "Reservation Updated" });
+    }
+    catch(err){
+        resp.status(404).send({ message: err.message });
+    }
+})
+
+// Delete Reservation
+app.delete("/deletereservation/:id", async (req, resp) => {
+    
+    try{
+        const id = req.params.id;
+        
+        const selectedBooking = await booking.findOne({_id: id});
+
+        if(selectedBooking){
+            const selectedBookingRoomNumber = selectedBooking.roomNumber;
+            const selectedRoom = await room.findOne({roomNumber: selectedBookingRoomNumber});
+            if(selectedRoom){
+            selectedRoom.roomStatus = "Available";
+            await selectedRoom.save();
+        }
+        }
+        await booking.deleteOne({_id: id});
+
+        resp.status(200).send({ message: "Reservation Deleted" });
+    }
+    catch(err){
+        resp.status(404).send({ message: err.message });
+    }
+})
+
 
 // Login
 app.post("/login", async (req, resp) => {

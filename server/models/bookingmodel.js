@@ -10,8 +10,7 @@ const bookingSchema = new mongoose.Schema({
   totalPrice: String,
   status: {
     type: String,
-    enum: ['reserved', 'checked_in', 'checked_out', 'cancelled'],
-    default: 'reserved'
+    default: 'Reserved'
   }
 });
 module.exports = mongoose.model("Booking", bookingSchema);

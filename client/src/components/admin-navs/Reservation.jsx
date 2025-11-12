@@ -1,34 +1,37 @@
-import React from 'react'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
 const Reservation = () => {
 
-    const reservationsData = [
-        {
-            id: 1,
-            guestName: "John Doe",
-            roomNumber: "101",
-            checkIn: "2025-11-01",
-            checkOut: "2025-11-05",
-            status: "Reserved",
-        },
-        {
-            id: 2,
-            guestName: "Alice Smith",
-            roomNumber: "202",
-            checkIn: "2025-11-02",
-            checkOut: "2025-11-07",
-            status: "Checked-In",
-        },
-        {
-            id: 3,
-            guestName: "Bob Johnson",
-            roomNumber: "303",
-            checkIn: "2025-11-10",
-            checkOut: "2025-11-12",
-            status: "Checked-Out",
-        },
-    ];
+    const [reservationsData, setReservationsData] = useState([]) ;
+
+    const fetchReservationsData = async () => {
+            try {
+                const response = await axios.get("http://localhost:3000/getreservation");
+                console.log(response.data);
+                setReservationsData(response.data);
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+    
+        useEffect(() => {
+            fetchReservationsData();
+        }, [])
+
+        const handleDelete = async (id) => {
+            try{
+                const response = await axios.delete(`http://localhost:3000/deletereservation/${id}`);
+                fetchReservationsData();
+                toast.success(response.data.message);
+            }
+            catch(err){
+                console.log(err);
+            }
+        }
 
     return (
         <>
@@ -54,13 +57,16 @@ const Reservation = () => {
                                             Guest Name
                                         </th>
                                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                            Room #
+                                            Room Number
                                         </th>
                                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                             Check-In
                                         </th>
                                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                             Check-Out
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Total Price
                                         </th>
                                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                             Status
@@ -72,17 +78,20 @@ const Reservation = () => {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {reservationsData.map((res) => (
-                                        <tr key={res.id}>
+                                        <tr key={res._id}>
                                             <td className="px-4 py-3 text-black">{res.guestName}</td>
                                             <td className="px-4 py-3 text-black">{res.roomNumber}</td>
-                                            <td className="px-4 py-3 text-black">{res.checkIn}</td>
-                                            <td className="px-4 py-3 text-black">{res.checkOut}</td>
+                                            <td className="px-4 py-3 text-black">{new Date(res.checkInDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-black">{new Date(res.checkOutDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-black">{`$${res.totalPrice}`}</td>
                                             <td className="px-4 py-3 text-black">{res.status}</td>
                                             <td className="px-4 py-3 text-center space-x-2">
-                                                <button className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+                                                <Link 
+                                                to={`/dashboard/reservation/editreservation/${res._id}`}
+                                                className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
                                                     Edit
-                                                </button>
-                                                <button className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+                                                </Link>
+                                                <button onClick={() => handleDelete(res._id)} className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
                                                     Delete
                                                 </button>
                                             </td>
@@ -94,6 +103,10 @@ const Reservation = () => {
                     </div>
                 </div>
             </div>
+            <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
         </>
     )
 }
