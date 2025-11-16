@@ -119,7 +119,7 @@ const AddStaff = () => {
                                         onChange={(e) => setPassword(e.target.value)}
                                     />
                                 </div>
-
+                                
                                 {/* Submit Button */}
                                 <div className="mt-8 text-center">
                                     <button

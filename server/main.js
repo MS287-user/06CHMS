@@ -30,7 +30,7 @@ app.post("/register", async (req, resp) => {
             return resp.status(400).send({ message: "User with this email address already exists" });
         }
 
-        await staffUsers.insertOne({ name, email, address, password: hashPassword, role: staffRole || "Admin" });
+        await staffUsers.insertOne({ name, email, address, password: hashPassword, role: staffRole || 'Admin' });
 
         resp.status(200).send({ message: "Registered Successfully" });
     }
@@ -54,9 +54,9 @@ app.get("/getstaff", async (req, resp) => {
 app.put("/updatestaff/:id", async (req, resp) => {
     try{
         const id = req.params.id;
-        const { editName, editEmail, editStaffRole } = req.body;
+        const { editName, editEmail, editStaffRole, editStaffStatus } = req.body;
         
-        await staffUsers.updateOne({_id: id}, {$set: { name: editName, email: editEmail, role: editStaffRole }});
+        await staffUsers.updateOne({_id: id}, {$set: { name: editName, email: editEmail, role: editStaffRole, status: editStaffStatus }});
         resp.status(200).send({ message: "Updated Successfully" });
     }
     catch(err){
@@ -214,7 +214,6 @@ app.delete("/deletereservation/:id", async (req, resp) => {
     }
 })
 
-
 // Login
 app.post("/login", async (req, resp) => {
     try {
@@ -229,8 +228,13 @@ app.post("/login", async (req, resp) => {
             return resp.status(400).send({ message: "User not found" });
         }
 
+        if(registeredUser.status == "Deactive") {
+            return resp.status(403).send({ message: "Your account has been deactivated" })
+        }
+
         const isMatch = await bcrypt.compare(password, registeredUser.password);
         if (isMatch) {
+
             resp.status(200).send({
                 message: "Logged in successfully",
                 registeredUser

@@ -6,6 +6,10 @@ const userSchema = new mongoose.Schema({
    address: String,
    password: String,
    profileImage: String,
-   role: String
+   role: String,
+   status: {
+      type: String,
+      default: 'Active'
+   }
 })
 module.exports = mongoose.model('Users', userSchema);

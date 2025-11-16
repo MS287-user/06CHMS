@@ -9,6 +9,7 @@ const Staff = () => {
     const [editName, setEditName] = useState("");
     const [editEmail, setEditEmail] = useState("");
     const [editStaffRole, setEditStaffRole] = useState("");
+    const [editStaffStatus, setEditStaffStatus] = useState("");
     const loggedUser = JSON.parse(localStorage.getItem("user"));
 
     const fetchStaff = async () => {
@@ -31,6 +32,7 @@ const Staff = () => {
         setEditName(staff.name);
         setEditEmail(staff.email);
         setEditStaffRole(staff.role);
+        setEditStaffStatus(staff.status);
     }
 
     const handleSave = async (id) => {
@@ -38,15 +40,16 @@ const Staff = () => {
             const response = await axios.put(`http://localhost:3000/updatestaff/${id}`, {
                 editName,
                 editEmail,
-                editStaffRole
+                editStaffRole,
+                editStaffStatus
             });
 
-            console.log(response.data);
             setEditId(null);
             fetchStaff();
             toast.success(response.data.message);
         }
         catch (err) {
+            toast.error(err.message);
             console.log(err);
         }
     }
@@ -92,6 +95,9 @@ const Staff = () => {
                                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                             Role
                                         </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Status
+                                        </th>
                                         <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
                                             Actions
                                         </th>
@@ -101,6 +107,7 @@ const Staff = () => {
                                 <tbody className="bg-white divide-y divide-gray-200 text-black">
                                     {staffData.map((staff, idx) => (
                                         <tr key={idx}>
+                                            {/* Name */}
                                             <td className="px-4 py-3">
                                                 {
                                                     staff._id == editId ?
@@ -115,6 +122,7 @@ const Staff = () => {
                                                         staff.name
                                                 }
                                             </td>
+                                            {/* Email */}
                                             <td className="px-4 py-3">
                                                 {
                                                     staff._id == editId ?
@@ -129,6 +137,7 @@ const Staff = () => {
                                                         staff.email
                                                 }
                                             </td>
+                                            {/* Roles */}
                                             <td className="px-4 py-3">
                                                 {
                                                     staff._id == editId ?
@@ -148,9 +157,29 @@ const Staff = () => {
                                                         staff.role
                                                 }
                                             </td>
+                                            {/* Status */}
+                                            <td className="px-4 py-3">
+                                                {
+                                                    staff._id == editId ?
+                                                        <select
+                                                            name="status"
+                                                            className="w-full border px-3 py-2 rounded text-black bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                                            value={editStaffStatus}
+                                                            onChange={(e) => setEditStaffStatus(e.target.value)}
+                                                        >
+                                                            <option value="" disabled >Select Status</option>
+                                                            <option value="Active" >Activate</option>
+                                                            <option value="Deactive" >Deactivate</option>
+                                                        </select>
+                                                        :
+                                                        staff.status
+                                                }
+                                            </td>
+                                            {/* Action */}
                                             <td className="px-4 py-3 text-center space-x-2">
                                                 {
                                                     staff._id == editId ?
+                                                        // Save and Cancel Buttons
                                                         <>
                                                             <button
                                                                 className="inline-block bg-green-500 hover:bg-green-600 text-black px-3 py-1 rounded"
@@ -166,24 +195,27 @@ const Staff = () => {
                                                             </button>
                                                         </>
                                                         :
+                                                        // Edit and Delete Buttons
                                                         <>
                                                             {loggedUser.role == "Manager" && staff.role == "Admin" ?
-                                                               ""
-                                                                :
-                                                                <>
-                                                                    <button
-                                                                        className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                                                                        onClick={() => handleEdit(staff)}
-                                                                    >
-                                                                        Edit
-                                                                    </button>
-                                                                    <button
-                                                                        className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                                                                        onClick={() => handleDelete(staff._id)}
-                                                                    >
-                                                                        Delete
-                                                                    </button>
-                                                                </>}
+                                                                "" : loggedUser.role == "Admin" && staff.role == "Admin" ?
+                                                                    "" : loggedUser.role == "Manager" && staff.role == "Manager" ?
+                                                                    ""
+                                                                    :
+                                                                    <>
+                                                                        <button
+                                                                            className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                                                                            onClick={() => handleEdit(staff)}
+                                                                        >
+                                                                            Edit
+                                                                        </button>
+                                                                        <button
+                                                                            className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                                                                            onClick={() => handleDelete(staff._id)}
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    </>}
                                                         </>
                                                 }
 

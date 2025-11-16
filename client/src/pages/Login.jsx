@@ -5,7 +5,6 @@ const Login = ({loginUser}) => {
   return (
     <>
       <LoginForm loginUser={loginUser} />
-      
     </>
   )
 }

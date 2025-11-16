@@ -34,7 +34,7 @@ const SideNavbar = ({ logoutUser }) => {
 
       <div className="mb-6">
         <h2 className="text-xs font-semibold text-gray-400 px-2 mb-2">
-          ADMIN
+          ADMIN/MANAGER
         </h2>
         <ul>
           <li>
@@ -164,11 +164,11 @@ const SideNavbar = ({ logoutUser }) => {
 
       {/* STAFF SECTION */}
 
-      {loggedUser.role == "Receptionist" || loggedUser.role == "Admin" ?
+      {loggedUser.role == "Receptionist" ?
 
       <div className="mb-6">
         <h2 className="text-xs font-semibold text-gray-400 px-2 mb-2">
-          STAFF
+          RECEPTIONIST
         </h2>
         <ul>
           <li>
@@ -238,7 +238,7 @@ const SideNavbar = ({ logoutUser }) => {
 
       {/* GUEST SECTION */}
 
-      { loggedUser.role == "Housekeeper" || loggedUser.role == "Admin" ? 
+      { loggedUser.role == "Housekeeper" ? 
 
       <div className="mb-6">
         <h2 className="text-xs font-semibold text-gray-400 px-2 mb-2">
@@ -299,7 +299,7 @@ const SideNavbar = ({ logoutUser }) => {
       : ""}
 
       {/* OTHER SECTION */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <h2 className="text-xs font-semibold text-gray-400 px-2 mb-2">Other</h2>
         <ul>
           <li>
@@ -312,7 +312,7 @@ const SideNavbar = ({ logoutUser }) => {
             </button>
           </li>
         </ul>
-      </div>
+      </div> */}
     </div>
   );
 };
