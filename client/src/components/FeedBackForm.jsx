@@ -19,7 +19,7 @@ const FeedBackForm = () => {
     };
     return (
         <>
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+            <div id='feedback' className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
                 <form
                     onSubmit={handleSubmit}
                     className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md"

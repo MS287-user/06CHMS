@@ -8,8 +8,9 @@ import BookingModal from "../components/BookingModal";
 import Footer from '../components/Footer';
 import About from '../components/About';
 import FeedBackForm from '../components/FeedBackForm';
+import { Toaster } from 'react-hot-toast';
 
-const Home = () => {
+const Home = ({ logoutUser }) => {
     const [open, setOpen] = useState(false);
 
     const countries = [
@@ -28,15 +29,18 @@ const Home = () => {
     return (
         <>
             <div className="w-full min-h-screen bg-gray-50">
-                <Navbar />
+                <Navbar logoutUser={logoutUser} />
                 <HeroSection setOpen={setOpen} />
                 <About/>
                 <RoomsSection setOpen={setOpen} />
                 <FacilitiesSection setOpen={setOpen} />
-                <FeedBackForm/>
                 <BookingModal open={open} setOpen={setOpen} handleSubmit={handleSubmit} countries={countries} />
 
                 <Footer />
+                <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
             </div>
         </>
     )

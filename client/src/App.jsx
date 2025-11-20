@@ -36,10 +36,12 @@ import GuestFeedback from "./components/guest-navs/GuestFeedback";
 import GuestServiceRequest from "./components/guest-navs/GuestServiceRequest";
 import Login from "./pages/Login";
 import AppLayout from "./AppLayout";
-import Register from "./pages/Register";
 import { useState } from "react";
 import EditReservation from "./components/admin-navs/EditReservation";
 import Home from "./pages/Home";
+import Guests from "./components/admin-navs/Guests";
+import AddGuest from "./components/admin-navs/AddGuest";
+import GuestRegister from "./pages/GuestRegister";
 
 const App = () => {
   const [loggedUser, setLoggedUser] = useState(localStorage.getItem("user") || "");
@@ -56,11 +58,12 @@ const App = () => {
   return (
     <Router>
           <Routes>
-            <Route path="/" element={<Home/>}></Route>
+            <Route path="/" element={<Home logoutUser={logoutUser} />}></Route>
             {/* ADMIN ROUTES */}
             <Route path="/" element={ loggedUser ? <AppLayout logoutUser={logoutUser}/> : <Navigate to={"/login"}/> }>
             {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
             <Route path="/dashboard/staff" element={<Staff />} />
+            <Route path="/dashboard/guests" element={<Guests />} />
             <Route path="/dashboard/rooms" element={<Rooms />} />
             <Route path="/dashboard/reservation" element={<Reservation />} />
             <Route path="/dashboard/checkinout" element={<CheckInOut />} />
@@ -71,6 +74,7 @@ const App = () => {
             <Route path="/dashboard/settings" element={<Settings />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/staff/addstaff" element={<AddStaff />} />
+            <Route path="/dashboard/guests/addguest" element={<AddGuest />} />
             <Route path="/dashboard/rooms/addroom" element={<AddRoom />} />
             <Route path="/dashboard/reservation/addreservation" element={<AddReservation />} />
             <Route path="/dashboard/reservation/editreservation/:id" element={<EditReservation />} />
@@ -104,7 +108,7 @@ const App = () => {
 
 
            <Route path="/login" element={<Login loginUser={loginUser} />}></Route>
-           <Route path="/register" element={<Register/>}></Route>
+           <Route path="/guestregister" element={<GuestRegister />}></Route>
 
           </Routes>
        

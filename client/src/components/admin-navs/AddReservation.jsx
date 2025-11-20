@@ -5,21 +5,29 @@ import toast, { Toaster } from 'react-hot-toast';
 
 const AddReservation = () => {
     const [roomsData, setRoomsData] = useState([]);
-    const [guestName, setGuestName] = useState("");
-    const [guestEmail, setGuestEmail] = useState("");
-    const [guestPhone, setGuestPhone] = useState("");
-    const [roomNumber, setRoomNumber] = useState("");
+    const [guestData, setGuestData] = useState([]);
+    const [guestId, setGuestId] = useState("");
+    const [roomId, setRoomId] = useState("");
     const [checkInDate, setCheckInDate] = useState("");
     const [checkOutDate, setCheckOutDate] = useState("");
     const [totalPrice, setTotalPrice] = useState("");
+    const today = new Date().toISOString().split("T")[0];
+
     const fetchRooms = async () => {
         try {
             const response = await axios.get("http://localhost:3000/getroom");
             console.log(response.data);
-            const availableRooms = response.data.filter(
-                (room) => room.roomStatus === "Available"
-            );
-            setRoomsData(availableRooms);
+            setRoomsData(response.data);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+    const fetchGuest = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/getguest");
+            console.log(response.data);
+            setGuestData(response.data);
         }
         catch (err) {
             console.log(err);
@@ -28,12 +36,13 @@ const AddReservation = () => {
 
     useEffect(() => {
         fetchRooms();
+        fetchGuest();
     }, [])
 
     useEffect(() => {
-        if (!roomNumber || !checkInDate || !checkOutDate) return;
+        if (!roomId || !checkInDate || !checkOutDate) return;
 
-        const selectedRoom = roomsData.find((r) => r.roomNumber === roomNumber);
+        const selectedRoom = roomsData.find((r) => r._id === roomId);
         if (!selectedRoom) return;
 
         const checkIn = new Date(checkInDate);
@@ -48,30 +57,27 @@ const AddReservation = () => {
         } else {
             setTotalPrice("");
         }
-    }, [roomNumber, checkInDate, checkOutDate, roomsData]);
+    }, [roomId, checkInDate, checkOutDate, roomsData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try{
             const response = await axios.post("http://localhost:3000/addreservation",{
-                guestName,
-                guestEmail,
-                guestPhone,
-                roomNumber,
+                guestId,
+                roomId,
                 checkInDate,
                 checkOutDate,
                 totalPrice
             });
 
             console.log(response.data);
-            setGuestName("");
-            setGuestEmail("");
-            setGuestPhone("");
-            setRoomNumber("");
+            setGuestId("");
+            setRoomId("");
             setCheckInDate("");
             setCheckOutDate("");
             setTotalPrice("");
             fetchRooms();
+            fetchGuest();
             toast.success(response.data.message);
         }
         catch(err){
@@ -91,51 +97,36 @@ const AddReservation = () => {
                     </div>
                     <div className="px-6 py-6">
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Guest Info */}
                             <div>
                                 <label className="block text-gray-700 mb-1">Guest Name</label>
-                                <input
-                                    type="text"
-                                    name="guestName"
-                                    value={guestName}
-                                    onChange={(e) => setGuestName(e.target.value)}
+                                <select
+                                    name="guest"
+                                    value={guestId}
+                                    onChange={(e) => setGuestId(e.target.value)}
                                     className="w-full border px-3 py-2 rounded text-black"
-                                />
+                                >
+                                    <option value="" disabled>Select Name</option>
+                                    {guestData.map((guest, idx) => (
+                                        <option key={idx} value={guest._id}>
+                                            {guest.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-
-                            <div>
-                                <label className="block text-gray-700 mb-1">Guest Email</label>
-                                <input
-                                    type="email"
-                                    name="guestEmail"
-                                    value={guestEmail}
-                                    onChange={(e) => setGuestEmail(e.target.value)}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-gray-700 mb-1">Guest Phone</label>
-                                <input
-                                    type="tel"
-                                    name="guestPhone"
-                                    value={guestPhone}
-                                    onChange={(e) => setGuestPhone(e.target.value)}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                    placeholder="e.g. 03001234567"
-                                />
-                            </div>
-
+                            
+                            {/* Room Info */}
                             <div>
                                 <label className="block text-gray-700 mb-1">Select Room</label>
                                 <select
                                     name="roomNumber"
-                                    value={roomNumber}
-                                    onChange={(e) => setRoomNumber(e.target.value)}
+                                    value={roomId}
+                                    onChange={(e) => setRoomId(e.target.value)}
                                     className="w-full border px-3 py-2 rounded text-black"
                                 >
                                     <option value="" disabled> Select Available Room </option>
                                     {roomsData.map((room, idx) => (
-                                        <option key={idx} value={room.roomNumber}>
+                                        <option key={idx} value={room._id}>
                                             {room.roomNumber} — {room.roomType} (${room.roomPrice})
                                         </option>
                                     ))}
@@ -148,6 +139,7 @@ const AddReservation = () => {
                                     <input
                                         type="date"
                                         name="checkInDate"
+                                        min={today}
                                         value={checkInDate}
                                         onChange={(e) => setCheckInDate(e.target.value)}
                                         className="w-full border px-3 py-2 rounded text-black"
@@ -159,6 +151,7 @@ const AddReservation = () => {
                                     <input
                                         type="date"
                                         name="checkOutDate"
+                                        min={checkInDate || today}
                                         value={checkOutDate}
                                         onChange={(e) => setCheckOutDate(e.target.value)}
                                         className="w-full border px-3 py-2 rounded text-black"

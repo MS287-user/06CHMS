@@ -1,34 +1,52 @@
+import axios from 'axios';
 import React from 'react'
+import { useEffect } from 'react';
+import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
 const CheckInOut = () => {
 
-    const checkInOutData = [
-        {
-            id: 1,
-            guestName: "Sarah Miller",
-            roomNumber: "101",
-            checkInDate: "2025-11-05",
-            checkOutDate: "2025-11-10",
-            status: "Checked-In",
-        },
-        {
-            id: 2,
-            guestName: "David Lee",
-            roomNumber: "205",
-            checkInDate: "2025-11-07",
-            checkOutDate: "2025-11-12",
-            status: "Reserved",
-        },
-        {
-            id: 3,
-            guestName: "Emma Brown",
-            roomNumber: "310",
-            checkInDate: "2025-11-09",
-            checkOutDate: "2025-11-15",
-            status: "Checked-Out",
-        },
-    ];
+    const [reservationsData, setReservationsData] = useState([]);
+
+    const fetchReservationsData = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/getreservation");
+            console.log(response.data);
+            setReservationsData(response.data);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    useEffect(() => {
+        fetchReservationsData();
+    }, [])
+
+    const handleCheckIn = async (id) => {
+        try {
+            const response = await axios.put(`http://localhost:3000/reservationstatuscheckedin/${id}`);
+            console.log(response.data);
+            fetchReservationsData();
+            toast.success(response.data.message);
+        }
+        catch (err) {
+            toast.error(err.response.data.message);
+        }
+    }
+
+    const handleCheckOut = async (id) => {
+        try {
+            const response = await axios.put(`http://localhost:3000/reservationstatuscheckedout/${id}`);
+            console.log(response.data);
+            fetchReservationsData();
+            toast.success(response.data.message);
+        }
+        catch (err) {
+            toast.error(err.response.data.message);
+        }
+    }
 
     return (
         <>
@@ -36,16 +54,16 @@ const CheckInOut = () => {
                 <div className="max-w-5xl mx-auto bg-white shadow rounded-lg overflow-hidden">
                     <div className="px-6 py-4 border-b">
                         <h1 className="text-2xl font-semibold text-gray-800">
-                            Check-In / Check-Out Management
+                            Guest-In / Guest-Out Management
                         </h1>
                     </div>
                     <div className="px-6 py-4">
-                        <Link
+                        {/* <Link
                             to="/dashboard/checkinout/addcheckinout"
                             className="inline-block mb-4 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded"
                         >
                             New Check-In / Out 
-                        </Link>
+                        </Link> */}
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
@@ -71,19 +89,19 @@ const CheckInOut = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {checkInOutData.map((entry) => (
-                                        <tr key={entry.id}>
-                                            <td className="px-4 py-3 text-black">{entry.guestName}</td>
-                                            <td className="px-4 py-3 text-black">{entry.roomNumber}</td>
-                                            <td className="px-4 py-3 text-black">{entry.checkInDate}</td>
-                                            <td className="px-4 py-3 text-black">{entry.checkOutDate}</td>
-                                            <td className="px-4 py-3 text-black">{entry.status}</td>
+                                    {reservationsData.map((res) => (
+                                        <tr key={res._id}>
+                                            <td className="px-4 py-3 text-black">{res.guestId.name}</td>
+                                            <td className="px-4 py-3 text-black">{res.roomId.roomNumber}</td>
+                                            <td className="px-4 py-3 text-black">{new Date(res.checkInDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-black">{new Date(res.checkOutDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-black">{res.status}</td>
                                             <td className="px-4 py-3 text-center space-x-2">
-                                                <button className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
-                                                    Mark Check-Out
+                                                <button onClick={() => handleCheckIn(res._id)} className="inline-block bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">
+                                                    Check-In
                                                 </button>
-                                                <button className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
-                                                    Delete
+                                                <button onClick={() => handleCheckOut(res._id)} className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
+                                                    Check-Out
                                                 </button>
                                             </td>
                                         </tr>
@@ -94,6 +112,10 @@ const CheckInOut = () => {
                     </div>
                 </div>
             </div>
+            <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
         </>
     )
 }

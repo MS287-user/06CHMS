@@ -4,7 +4,7 @@ import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 
-const LoginForm = ({loginUser}) => {
+const LoginForm = ({ loginUser }) => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +22,13 @@ const LoginForm = ({loginUser}) => {
       console.log(response.data.message);
       toast.success(response.data.message);
       loginUser(response.data.registeredUser);
-      navigate("/dashboard");
+      if(response.data.registeredUser.role == "Guest"){
+        navigate("/");
+      }
+      else{
+        navigate("/dashboard");
+      }
+      
     }
     catch (err) {
       toast.error(err.response.data.message);
@@ -68,15 +74,15 @@ const LoginForm = ({loginUser}) => {
               >
                 Login
               </button>
-              {/* <p className="text-gray-700">
+              <p className="text-gray-700">
                 Not registered yet?
                 <Link
-                  to="/register"
+                  to="/guestregister"
                   className="text-yellow-600 hover:text-yellow-700 font-medium"
                 >
-                  Login here
+                  Register here
                 </Link>
-              </p> */}
+              </p>
             </form>
           </div>
         </div>

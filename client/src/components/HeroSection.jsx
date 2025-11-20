@@ -1,6 +1,8 @@
 import React from 'react'
+import toast from 'react-hot-toast';
 
 const HeroSection = ({ setOpen }) => {
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
     return (
         <>
             <section id="firstsection" className="relative w-full h-[85vh] overflow-hidden">
@@ -18,12 +20,22 @@ const HeroSection = ({ setOpen }) => {
                 </div>
 
                 {/* Book Now Button */}
-                <button
-                    onClick={() => setOpen(true)}
-                    className="absolute bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
-                >
-                    Book Now
-                </button>
+
+                {loggedUser ?
+                    <button
+                        onClick={() => setOpen(true)}
+                        className="absolute bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
+                    >
+                        Book Now
+                    </button>
+                    :
+                    <button
+                        onClick={() => toast.error("Login first to book a room")}
+                        className="absolute bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
+                    >
+                        Book Now
+                    </button>
+                }
             </section>
         </>
     )

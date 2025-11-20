@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 
 const Maintainance = () => {
 
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
+
     const maintenanceRequests = [
         {
             id: 1,
@@ -38,12 +40,14 @@ const Maintainance = () => {
                         <h1 className="text-2xl font-semibold text-gray-800">Maintenance Requests</h1>
                     </div>
                     <div className="px-6 py-4">
-                        <Link
-                            to="/dashboard/maintenance/addnewrequest"
-                            className="inline-block mb-4 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded"
-                        >
-                            Add New Request
-                        </Link>
+                        {loggedUser.role == "Housekeeper" ? ""
+                            : <Link
+                                to="/dashboard/maintenance/addnewrequest"
+                                className="inline-block mb-4 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded"
+                            >
+                                Add New Request
+                            </Link>
+                        }
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
@@ -66,7 +70,7 @@ const Maintainance = () => {
                                             <td className="px-4 py-3 text-black">{req.date}</td>
                                             <td className="px-4 py-3 text-center space-x-2">
                                                 <button className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
-                                                    Resolve
+                                                    Edit
                                                 </button>
                                                 <button className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
                                                     Delete

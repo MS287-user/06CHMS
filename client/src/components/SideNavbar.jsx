@@ -15,7 +15,7 @@ import {
   ChatBubbleLeftEllipsisIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
-import { MegaphoneIcon, UserCircleIcon } from "lucide-react";
+import { BedIcon, GroupIcon, MegaphoneIcon, User2, UserCircleIcon, WrenchIcon } from "lucide-react";
 
 const SideNavbar = ({ logoutUser }) => {
   const location = useLocation();
@@ -57,8 +57,20 @@ const SideNavbar = ({ logoutUser }) => {
                 : "text-gray-700 hover:bg-gray-100"
                 }`}
             >
-              <ShoppingCartIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <UserGroupIcon className="w-5 h-5 text-gray-500 mr-2" />
               <span>Staff</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard/guests"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/staff"
+                ? "bg-gray-200 text-gray-900 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              <UserGroupIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <span>Guests</span>
             </Link>
           </li>
           <li>
@@ -69,7 +81,7 @@ const SideNavbar = ({ logoutUser }) => {
                 : "text-gray-700 hover:bg-gray-100"
                 }`}
             >
-              <RocketLaunchIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <BedIcon className="w-5 h-5 text-gray-500 mr-2" />
               <span>Rooms</span>
             </Link>
           </li>
@@ -94,7 +106,7 @@ const SideNavbar = ({ logoutUser }) => {
                 }`}
             >
               <CalendarDaysIcon className="w-5 h-5 text-gray-500 mr-2" />
-              <span>Check-In/Out</span>
+              <span>Guest In / Guest Out</span>
             </Link>
           </li>
           <li>
@@ -129,7 +141,7 @@ const SideNavbar = ({ logoutUser }) => {
                 : "text-gray-700 hover:bg-gray-100"
                 }`}
             >
-              <UserGroupIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <WrenchIcon className="w-5 h-5 text-gray-500 mr-2" />
               <span>Maintenance</span>
             </Link>
           </li>
@@ -192,7 +204,7 @@ const SideNavbar = ({ logoutUser }) => {
                 }`}
             >
               <CalendarDaysIcon className="w-5 h-5 text-gray-500 mr-2" />
-              <span>Check-In/Out</span>
+              <span>Guest In / Guest Out</span>
             </Link>
           </li>
           <li>
@@ -236,9 +248,59 @@ const SideNavbar = ({ logoutUser }) => {
 
       : ""}
 
-      {/* GUEST SECTION */}
+      {/* Housekeeper SECTION */}
 
       { loggedUser.role == "Housekeeper" ? 
+
+      <div className="mb-6">
+        <h2 className="text-xs font-semibold text-gray-400 px-2 mb-2">
+          Housekeeper
+        </h2>
+        <ul>
+          <li>
+            <Link
+              to="/dashboard/housekeeping"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/housekeeping"
+                ? "bg-gray-200 text-gray-900 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              <SparklesIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <span>Housekeeping</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard/maintainance"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/maintainance"
+                ? "bg-gray-200 text-gray-900 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              <UserGroupIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <span>Maintenance</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard/staff/profile"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "//dashboard/staff/profile"
+                ? "bg-gray-200 text-gray-900 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              <UserCircleIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <span>Profile</span>
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      : ""}
+
+      {/* GUEST SECTION */}
+
+      { loggedUser.role == "Guest" ?
 
       <div className="mb-6">
         <h2 className="text-xs font-semibold text-gray-400 px-2 mb-2">

@@ -1,6 +1,8 @@
 import React from 'react'
+import toast from 'react-hot-toast';
 
 const FacilitiesSection = ({ setOpen }) => {
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
     const facilities = [
         { name: "Swimming Pool", img: "https://raw.githubusercontent.com/tushar-2223/Hotel-Management-System/refs/heads/main/image/swimingpool.jpg" },
         { name: "Spa", img: "https://raw.githubusercontent.com/tushar-2223/Hotel-Management-System/refs/heads/main/image/spa.jpg" },
@@ -21,12 +23,21 @@ const FacilitiesSection = ({ setOpen }) => {
                             <div className="p-5 text-center">
                                 <h2 className="text-xl font-semibold">{f.name}</h2>
 
-                                <button
-                                    onClick={() => setOpen(true)}
-                                    className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg"
-                                >
-                                    Book
-                                </button>
+                                {loggedUser ?
+                                    <button
+                                        onClick={() => setOpen(true)}
+                                        className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg"
+                                    >
+                                        Book
+                                    </button>
+                                    :
+                                    <button
+                                        onClick={() => toast.error("Login first to book a room")}
+                                        className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg"
+                                    >
+                                        Book
+                                    </button>
+                                }
                             </div>
                         </div>
                     ))}

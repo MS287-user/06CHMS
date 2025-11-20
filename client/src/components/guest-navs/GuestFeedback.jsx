@@ -2,92 +2,93 @@ import React, { useState } from 'react'
 
 const GuestFeedback = () => {
 
-    const [rating, setRating] = useState(5);
-    const [comment, setComment] = useState("");
+    const [formData, setFormData] = useState({
+            name: "",
+            email: "",
+            rating: "",
+            message: "",
+        });
+    
+        const handleChange = (e) => {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        };
+    
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            console.log("Feedback Submitted:", formData);
+            alert("Thank you for your feedback!");
+        };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Submitting feedback", { rating, comment });
-        setComment("");
-        setRating(5);
-    };
-
-
-    const pastFeedbacks = [
-        {
-            id: 1,
-            rating: 4,
-            comment: "Lovely stay and friendly staff.",
-            date: "2025-10-15",
-        },
-        {
-            id: 2,
-            rating: 5,
-            comment: "Room was clean and breakfast was amazing!",
-            date: "2025-10-20",
-        },
-    ];
 
     return (
         <>
-            <div className="p-6 bg-gray-100 min-h-screen">
-                <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b">
-                        <h1 className="text-2xl font-semibold text-gray-800">Leave Feedback</h1>
-                    </div>
-                    <div className="px-6 py-6 space-y-6">
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-gray-700 mb-1">Your Rating</label>
-                                <select
-                                    name="rating"
-                                    value={rating}
-                                    onChange={(e) => setRating(Number(e.target.value))}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                >
-                                    {[5, 4, 3, 2, 1].map((r) => (
-                                        <option key={r} value={r}>{r} Star{r > 1 ? "s" : ""}</option>
-                                    ))}
-                                </select>
-                            </div>
+            <div  className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+                <form
+                    onSubmit={handleSubmit}
+                    className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md"
+                >
+                    <h2 className="text-3xl font-bold mb-6 text-center">Hotel Feedback Form</h2>
 
-                            <div>
-                                <label className="block text-gray-700 mb-1">Comment</label>
-                                <textarea
-                                    name="comment"
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    rows={4}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                    placeholder="Write your experience..."
-                                    required
-                                ></textarea>
-                            </div>
+                    <label className="block mb-3">
+                        <span className="text-gray-700 font-medium">Name</span>
+                        <input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            className="w-full mt-1 p-2 border rounded-lg"
+                        />
+                    </label>
 
-                            <button
-                                type="submit"
-                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded"
-                            >
-                                Submit Feedback
-                            </button>
-                        </form>
+                    <label className="block mb-3">
+                        <span className="text-gray-700 font-medium">Email</span>
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            className="w-full mt-1 p-2 border rounded-lg"
+                        />
+                    </label>
 
-                        <div className="mt-8">
-                            <h2 className="text-lg font-semibold text-gray-700">Your Past Feedbacks</h2>
-                            <div className="space-y-4 mt-4">
-                                {pastFeedbacks.map((fb) => (
-                                    <div key={fb.id} className="border border-gray-200 rounded p-4 bg-gray-50">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="font-semibold text-black ">Rating: {fb.rating} / 5 </span>
-                                            <span className="text-sm text-gray-500">{fb.date}</span>
-                                        </div>
-                                        <p className="text-gray-700">{fb.comment}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    <label className="block mb-3">
+                        <span className="text-gray-700 font-medium">Rating</span>
+                        <select
+                            name="rating"
+                            value={formData.rating}
+                            onChange={handleChange}
+                            required
+                            className="w-full mt-1 p-2 border rounded-lg"
+                        >
+                            <option value="">Select Rating</option>
+                            <option value="1">1 - Poor</option>
+                            <option value="2">2 - Fair</option>
+                            <option value="3">3 - Good</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="5">5 - Excellent</option>
+                        </select>
+                    </label>
+
+                    <label className="block mb-4">
+                        <span className="text-gray-700 font-medium">Feedback Message</span>
+                        <textarea
+                            name="message"
+                            value={formData.message}
+                            onChange={handleChange}
+                            required
+                            className="w-full mt-1 p-2 border rounded-lg h-28"
+                        ></textarea>
+                    </label>
+
+                    <button
+                        type="submit"
+                        className="w-full bg-yellow-500 text-white py-2 rounded-lg font-semibold hover:bg-yellow-600 transition"
+                    >
+                        Submit Feedback
+                    </button>
+                </form>
             </div>
         </>
     )

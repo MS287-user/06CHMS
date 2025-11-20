@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 
 const Housekeeping = () => {
 
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
+
     const housekeepingTasks = [
         {
             id: 1,
@@ -38,12 +40,14 @@ const Housekeeping = () => {
                         <h1 className="text-2xl font-semibold text-gray-800">Housekeeping Tasks</h1>
                     </div>
                     <div className="px-6 py-4">
-                        <Link
-                            to="/dashboard/housekeeping/addnewtask"
-                            className="inline-block mb-4 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded"
-                        >
-                            Add New Task
-                        </Link>
+                        {loggedUser.role == "Housekeeper" ? ""
+                            : <Link
+                                to="/dashboard/housekeeping/addnewtask"
+                                className="inline-block mb-4 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded"
+                            >
+                                Add New Task
+                            </Link>
+                        }
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">

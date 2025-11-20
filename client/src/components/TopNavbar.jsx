@@ -14,12 +14,12 @@ const TopNavbar = ({ logoutUser }) => {
       {/* Left: Search  */}
       <div className="flex items-center gap-2 w-full max-w-md">
           {/* Notifications */}
-        <button className="relative">
+        {/* <button className="relative">
           <Bell className="h-6 w-6 text-gray-600 hover:text-blue-600" />
           <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
             3
           </span>
-        </button>
+        </button> */}
       </div>
 
       {/* Right Section */}

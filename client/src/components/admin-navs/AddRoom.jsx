@@ -81,6 +81,7 @@ const AddRoom = () => {
                                 >
                                     <option value="" disabled>Select Room Status</option>
                                     <option value="Available">Available</option>
+                                    <option value="Reserved">Reserved</option>
                                     <option value="Occupied">Occupied</option>
                                     <option value="Cleaning">Cleaning</option>
                                     <option value="Maintenance">Maintenance</option>

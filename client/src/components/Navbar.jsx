@@ -1,7 +1,8 @@
 import React from 'react'
-import { Link } from "react-router-dom";
+import { Link, Links } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({ logoutUser }) => {
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
     return (
         <>
             <nav className="flex justify-between items-center px-6 py-4 bg-white shadow">
@@ -11,13 +12,26 @@ const Navbar = () => {
                 </div>
 
                 <ul className="flex items-center gap-6 font-medium text-gray-700">
-                    <a href="#firstsection">Home</a>
+                    <Link to={'/'}>Home</Link>
                     <a href="#secondsection">Rooms</a>
                     <a href="#thirdsection">Facilities</a>
-                    <a href="#contactus">Contact Us</a>
-                    <Link to={"/login"} className="px-4 py-1 bg-blue-500 text-white rounded-lg">
-                        Login (Staff Only)
-                    </Link>
+                    {loggedUser?.role == "Guest" ?
+                        <Link to={'/dashboard/guest/bookings'}>Dashboard</Link>
+                        :
+                        loggedUser ?
+                        <Link to={'/dashboard'}>Dashboard</Link>
+                        :
+                        ""
+                    }
+                    {loggedUser ?
+                        <button onClick={logoutUser} className="px-4 py-1 bg-red-500 text-white rounded-lg">
+                            Logout
+                        </button>
+                        :
+                        <Link to={"/login"} className="px-4 py-1 bg-blue-500 text-white rounded-lg">
+                            Login
+                        </Link>
+                    }
                 </ul>
             </nav>
         </>

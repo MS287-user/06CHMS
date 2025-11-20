@@ -79,8 +79,8 @@ const Reservation = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {reservationsData.map((res) => (
                                         <tr key={res._id}>
-                                            <td className="px-4 py-3 text-black">{res.guestName}</td>
-                                            <td className="px-4 py-3 text-black">{res.roomNumber}</td>
+                                            <td className="px-4 py-3 text-black">{res.guestId.name}</td>
+                                            <td className="px-4 py-3 text-black">{res.roomId.roomNumber}</td>
                                             <td className="px-4 py-3 text-black">{new Date(res.checkInDate).toLocaleDateString()}</td>
                                             <td className="px-4 py-3 text-black">{new Date(res.checkOutDate).toLocaleDateString()}</td>
                                             <td className="px-4 py-3 text-black">{`$${res.totalPrice}`}</td>

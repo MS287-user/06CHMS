@@ -7,32 +7,25 @@ const EditReservation = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [roomsData, setRoomsData] = useState([]);
-    const [editGuestName, setEditGuestName] = useState("");
-    const [editGuestEmail, setEditGuestEmail] = useState("");
-    const [editGuestPhone, setEditGuestPhone] = useState("");
-    const [editRoomNumber, setEditRoomNumber] = useState("");
+    const [guestName, setGuestName] = useState("");
+    const [updateRoomId, setUpdateRoomId] = useState("");
     const [editCheckInDate, setEditCheckInDate] = useState("");
     const [editCheckOutDate, setEditCheckOutDate] = useState("");
     const [totalPrice, setTotalPrice] = useState("");
-    const [editBookingStatus, setEditBookingStatus] = useState("");
 
     const fetchReservationsData = async () => {
         try {
             const response = await axios.get(`http://localhost:3000/getreservation/${id}`);
             console.log(response.data);
-            const { guestName, guestEmail, guestPhone, roomNumber, checkInDate, checkOutDate, totalPrice, status } = response.data;
-
+            const { guestId, checkInDate, checkOutDate, totalPrice } = response.data;
+            
             const dateIn = checkInDate?.split('T')[0];
             const dateOut = checkOutDate?.split('T')[0];
 
-            setEditGuestName(guestName);
-            setEditGuestEmail(guestEmail);
-            setEditGuestPhone(guestPhone);
-            setEditRoomNumber(roomNumber);
+            setGuestName(guestId.name);
             setEditCheckInDate(dateIn);
             setEditCheckOutDate(dateOut);
             setTotalPrice(totalPrice);
-            setEditBookingStatus(status);
         }
         catch (err) {
             console.log(err);
@@ -44,10 +37,7 @@ const EditReservation = () => {
         try {
             const response = await axios.get("http://localhost:3000/getroom");
             // console.log(response.data);
-            const availableRooms = response.data.filter(
-                (room) => room.roomStatus === "Available"
-            );
-            setRoomsData(availableRooms);
+            setRoomsData(response.data);
         }
         catch (err) {
             console.log(err);
@@ -60,9 +50,9 @@ const EditReservation = () => {
     }, [])
 
     useEffect(() => {
-        if (!editRoomNumber || !editCheckInDate || !editCheckOutDate) return;
+        if (!updateRoomId || !editCheckInDate || !editCheckOutDate) return;
 
-        const selectedRoom = roomsData.find((r) => r.roomNumber === editRoomNumber);
+        const selectedRoom = roomsData.find((r) => r._id === updateRoomId);
         if (!selectedRoom) return;
 
         const checkIn = new Date(editCheckInDate);
@@ -77,20 +67,16 @@ const EditReservation = () => {
         } else {
             setTotalPrice("");
         }
-    }, [editRoomNumber, editCheckInDate, editCheckOutDate, roomsData]);
+    }, [updateRoomId, editCheckInDate, editCheckOutDate, roomsData]);
 
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
             const response = await axios.put(`http://localhost:3000/updatereservation/${id}`, {
-                editGuestName,
-                editGuestEmail,
-                editGuestPhone,
-                editRoomNumber,
+                updateRoomId,
                 editCheckInDate,
                 editCheckOutDate,
                 totalPrice,
-                editBookingStatus
             });
             toast.success(response.data.message);
             navigate("/dashboard/reservation");
@@ -116,61 +102,23 @@ const EditReservation = () => {
                                 <input
                                     type="text"
                                     name="guestName"
-                                    value={editGuestName}
-                                    onChange={(e) => setEditGuestName(e.target.value)}
+                                    value={guestName}
                                     className="w-full border px-3 py-2 rounded text-black"
+                                    readOnly
                                 />
-                            </div>
-
-                            <div>
-                                <label className="block text-gray-700 mb-1">Guest Email</label>
-                                <input
-                                    type="email"
-                                    name="guestEmail"
-                                    value={editGuestEmail}
-                                    onChange={(e) => setEditGuestEmail(e.target.value)}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-gray-700 mb-1">Guest Phone</label>
-                                <input
-                                    type="tel"
-                                    name="guestPhone"
-                                    value={editGuestPhone}
-                                    onChange={(e) => setEditGuestPhone(e.target.value)}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                    placeholder="e.g. 03001234567"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-gray-700 mb-1">Select Booking Status</label>
-                                <select
-                                    name="roomNumber"
-                                    value={editBookingStatus}
-                                    onChange={(e) => setEditBookingStatus(e.target.value)}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                >
-                                    <option value="" disabled> Select Booking Status </option>
-                                    <option value="Reserved">Reserved</option>
-                                    <option value="Checked-In">Checked-In</option>
-                                    <option value="Checked-Out">Checked-Out</option>
-                                </select>
                             </div>
 
                             <div>
                                 <label className="block text-gray-700 mb-1">Select Room</label>
                                 <select
                                     name="roomNumber"
-                                    value={editRoomNumber}
-                                    onChange={(e) => setEditRoomNumber(e.target.value)}
+                                    value={updateRoomId}
+                                    onChange={(e) => setUpdateRoomId(e.target.value)}
                                     className="w-full border px-3 py-2 rounded text-black"
                                 >
                                     <option value="" disabled> Select Available Room </option>
                                     {roomsData.map((room, idx) => (
-                                        <option key={idx} value={room.roomNumber}>
+                                        <option key={idx} value={room._id}>
                                             {room.roomNumber} — {room.roomType} (${room.roomPrice})
                                         </option>
                                     ))}
