@@ -10,6 +10,9 @@ const room = require("./models/roomModel");
 const booking = require("./models/bookingmodel");
 const guest = require("./models/guestmodel");
 const maintenance = require("./models/maintenance");
+const billing = require("./models/billingModel");
+const cleaning  = require("./models/cleaningModel");
+const { ObjectId } = require("mongodb");
 
 app.use(express.json());
 app.use(cors());
@@ -379,7 +382,7 @@ app.put("/updatemaintenance/:id", async (req, resp) => {
                         await selectedRoom.save();
                     }
                 }
-                else{
+                else {
                     const selectedRoom = await room.findOne({ _id: selectedMaintenanceRoomId });
                     if (selectedRoom) {
                         selectedRoom.roomStatus = "Available";
@@ -424,6 +427,266 @@ app.delete("/deletemaintenance/:id", async (req, resp) => {
         resp.status(404).send({ message: err.message });
     }
 })
+
+// maaz code 
+
+app.get("/getreservationbyroom/:roomNumber", async (req, resp) => {
+  try {
+    const { roomNumber } = req.params;
+
+    // Room find by roomNumber
+    const selectedRoom = await room.findOne({ roomNumber: roomNumber });
+
+    if (!selectedRoom)
+      return resp.status(404).send({ message: "Room not found" });
+
+    const reservation = await booking
+      .findOne({ roomId: selectedRoom._id })
+      .populate("guestId")
+      .populate("roomId");
+
+    if (!reservation)
+      return resp.status(404).send({ message: "No reservation found for this room" });
+
+    const checkIn = new Date(reservation.checkInDate);
+    const checkOut = new Date(reservation.checkOutDate);
+    const diffTime = Math.abs(checkOut - checkIn);
+    let days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (days === 0) days = 1;
+
+    const roomPrice = reservation.totalPrice / days;
+
+    resp.status(200).send({
+      guestName: reservation.guestId ? reservation.guestId.name : "Unknown",
+      checkInDate: reservation.checkInDate,
+      checkOutDate: reservation.checkOutDate,
+      totalDays: days,
+      roomPrice,
+    });
+
+  } catch (err) {
+    resp.status(500).send({ message: err.message });
+  }
+});
+
+app.get("/getcheckoutroomsfrombooking", async (req, resp) => {
+  try {
+    const checkoutBookings = await booking.find({ status: "Checked-Out" }).populate("roomId");
+
+    if (checkoutBookings.length === 0)
+      return resp.status(404).send({ message: "No checkout rooms found" });
+
+    const rooms = checkoutBookings.map(b => ({
+      _id: b._id,
+      roomNumber: b.roomId ? b.roomId.roomNumber : "Unknown",
+      guestName: b.guestId ? b.guestId.name : b.guestName
+    }));
+
+    resp.status(200).send(rooms);
+  } catch (err) {
+    resp.status(500).send({ message: err.message });
+  }
+});
+
+
+app.get("/getcheckoutrooms", async (req, res) => {
+    try {
+        const rooms = await room.find({ roomStatus: "Occupied" });
+        res.status(200).send(rooms);
+    } catch (err) {
+        res.status(500).send({ message: err.message });
+    }
+});
+
+app.post("/addbilling", async (req, resp) => {
+    try {
+        const { guestName, roomNumber, checkInDate, checkOutDate, totalDays, roomPrice, additionalCharges, totalAmount, paymentStatus } = req.body;
+        await billing.insertOne({ guestName, roomNumber, checkInDate, checkOutDate, totalDays, roomPrice, additionalCharges, totalAmount, paymentStatus });
+        resp.status(200).send({ message: "Billing record added successfully" });
+    } catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+});
+
+app.get("/getbilling", async (req, resp) => {
+    try {
+        const billingData = await billing.find();
+        resp.status(200).send(billingData);
+    } catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+});
+
+app.put("/updatebilling/:id", async (req, resp) => {
+    try {
+        const id = req.params.id;
+        const { editGuestName, editRoomNumber, editCheckInDate, editCheckOutDate, editTotalDays, editRoomPrice, editAdditionalCharges, editTotalAmount, editPaymentStatus } = req.body;
+        await billing.updateOne({ _id: new ObjectId(id) }, { $set: { guestName: editGuestName, roomNumber: editRoomNumber, checkInDate: editCheckInDate, checkOutDate: editCheckOutDate, totalDays: editTotalDays, roomPrice: editRoomPrice, additionalCharges: editAdditionalCharges, totalAmount: editTotalAmount, paymentStatus: editPaymentStatus } });
+        resp.status(200).send({ message: "Billing record updated successfully" });
+    } catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+});
+
+app.delete("/deletebilling/:id", async (req, resp) => {
+    try {
+        const id = req.params.id;
+        await billing.deleteOne({ _id: new ObjectId(id) });
+        resp.status(200).send({ message: "Billing record deleted successfully" });
+    } catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+});
+
+app.get("/downloadinvoice/:roomNumber", async (req, resp) => {
+    try {
+        const { roomNumber } = req.params;
+
+        const reservation = await booking.findOne({ roomNumber: roomNumber });
+
+        if (!reservation)
+            return resp.status(404).send({ message: "No reservation found!" });
+
+        const checkIn = new Date(reservation.checkInDate);
+        const checkOut = new Date(reservation.checkOutDate);
+        const diff = Math.abs(checkOut - checkIn);
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+        const roomPrice = reservation.totalPrice / days;
+
+        const data = {
+            guestName: reservation.guestName,
+            roomNumber,
+            checkInDate: reservation.checkInDate,
+            checkOutDate: reservation.checkOutDate,
+            days,
+            roomPrice,
+            extraServicesPrice: reservation.extraServices || 0,
+            totalPrice: reservation.totalPrice
+        };
+
+        const filePath = `./invoices/invoice-${roomNumber}.pdf`;
+
+        await generateInvoice(data, filePath);
+
+        resp.download(filePath);
+
+    } catch (err) {
+        resp.status(500).send({ message: err.message });
+    }
+});
+
+//cleaning 
+
+// Add
+app.post("/addcleaning", async (req, resp) => {
+    try {
+        const { roomId, cleaningStatus, reportedDate } = req.body;
+
+        const newcleaning = new cleaning({
+            roomId,
+            cleaningStatus: cleaningStatus || "Pending",
+            reportedDate: reportedDate || new Date()
+        });
+
+        await newcleaning.save();
+
+        const selectedRoom = await room.findById(roomId);
+        if (selectedRoom) {
+            selectedRoom.roomStatus = "cleaning";
+            await selectedRoom.save();
+        }
+
+        resp.status(200).send({ message: "cleaning Request Added" });
+    } catch (err) {
+        resp.status(500).send({ message: err.message });
+    }
+});
+
+// Get
+app.get("/getcleaning", async (req, resp) => {
+    try {
+        const cleaningData = await cleaning.find().populate('roomId');
+        resp.status(200).send(cleaningData);
+    } catch (err) {
+        resp.status(500).send({ message: err.message });
+    }
+});
+
+// Update
+app.put("/updatecleaning/:id", async (req, resp) => {
+    try {
+        const id = req.params.id;
+        const { cleaningStatus } = req.body;
+
+        if (!ObjectId.isValid(id)) {
+            return resp.status(400).send({ message: "Invalid cleaning ID" });
+        }
+
+        const updatedCleaning = await cleaning.findByIdAndUpdate(
+            id,
+            { cleaningStatus },
+            { new: true } 
+        );
+
+        if (!updatedCleaning) {
+            return resp.status(404).send({ message: "Cleaning task not found" });
+        }
+
+        if (updatedCleaning.roomId) {
+            const selectedRoom = await room.findById(updatedCleaning.roomId);
+            if (selectedRoom) {
+                if (cleaningStatus === "Pending" || cleaningStatus === "In Progress") {
+                    selectedRoom.roomStatus = "cleaning";
+                } else if (cleaningStatus === "Completed") {
+                    const activeBooking = await booking.findOne({ roomId: selectedRoom._id, status: "Checked-In" });
+                    selectedRoom.roomStatus = activeBooking ? "Occupied" : "Available";
+                }
+                await selectedRoom.save();
+            }
+        }
+
+        resp.status(200).send({ message: "Cleaning status updated successfully" });
+    } catch (err) {
+        console.error(err);
+        resp.status(500).send({ message: err.message });
+    }
+});
+
+
+// Delete
+app.delete("/deletecleaning/:id", async (req, resp) => {
+    try {
+        const id = req.params.id;
+
+        // Cleaning record find
+        const cleaningRecord = await cleaning.findById(id);
+        if (!cleaningRecord) {
+            return resp.status(404).send({ message: "Cleaning task not found" });
+        }
+
+        // Room status update
+        if (cleaningRecord.roomId) {
+            const selectedRoom = await room.findById(cleaningRecord.roomId);
+            if (selectedRoom) {
+                const activeBooking = await booking.findOne({ roomId: selectedRoom._id, status: "Checked-In" });
+                selectedRoom.roomStatus = activeBooking ? "Occupied" : "Available";
+                await selectedRoom.save();
+            }
+        }
+
+        // Delete cleaning record
+        await cleaning.deleteOne({ _id: id });
+        resp.status(200).send({ message: "Cleaning task deleted successfully" });
+
+    } catch (err) {
+        console.error(err);
+        resp.status(500).send({ message: err.message });
+    }
+});
+
+
+
 
 // Login
 app.post("/login", async (req, resp) => {

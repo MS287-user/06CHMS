@@ -1,26 +1,50 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const AddNewTask = () => {
+    const navigate = useNavigate();
 
     const [form, setForm] = useState({
-        roomNumber: "",
-        taskDescription: "",
-        assignedTo: "",
-        date: "",
-        status: "Pending",
+        roomId: "",
+        reportedDate: "",
+        cleaningStatus: "Pending",
     });
+
+    const [rooms, setRooms] = useState([]);
+
+    useEffect(() => {
+        const fetchRooms = async () => {
+            try {
+                const res = await axios.get("http://localhost:3000/getroom");
+                setRooms(res.data);
+            } catch (err) {
+                console.error(err);
+                toast.error("Failed to fetch rooms");
+            }
+        };
+        fetchRooms();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForm((prev) => ({
+        setForm(prev => ({
             ...prev,
-            [name]: value,
+            [name]: value
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("New housekeeping task:", form);
+        try {
+            await axios.post("http://localhost:3000/addcleaning", form);
+            toast.success("Task created successfully");
+            navigate("/dashboard/housekeeping"); 
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to create task");
+        }
     };
 
     return (
@@ -29,17 +53,35 @@ const AddNewTask = () => {
                 <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
                     <div className="px-6 py-4 border-b">
                         <h1 className="text-2xl font-semibold text-gray-800">
-                            Add New Housekeeping Task
+                            Add New Cleaning Task
                         </h1>
                     </div>
                     <div className="px-6 py-6">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-gray-700 mb-1">Room Number</label>
+                                <select
+                                    name="roomId"
+                                    value={form.roomId}
+                                    onChange={handleChange}
+                                    className="w-full border px-3 py-2 rounded text-black"
+                                    required
+                                >
+                                    <option value="">Select Room</option>
+                                    {rooms.map(room => (
+                                        <option key={room._id} value={room._id}>
+                                            {room.roomNumber}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-gray-700 mb-1">Date</label>
                                 <input
-                                    type="text"
-                                    name="roomNumber"
-                                    value={form.roomNumber}
+                                    type="date"
+                                    name="reportedDate"
+                                    value={form.reportedDate}
                                     onChange={handleChange}
                                     className="w-full border px-3 py-2 rounded text-black"
                                     required
@@ -47,43 +89,10 @@ const AddNewTask = () => {
                             </div>
 
                             <div>
-                                <label className="block text-gray-700 mb-1">Task Description</label>
-                                <textarea
-                                    name="taskDescription"
-                                    value={form.taskDescription}
-                                    onChange={handleChange}
-                                    rows={3}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-gray-700 mb-1">Assigned To</label>
-                                <input
-                                    type="text"
-                                    name="assignedTo"
-                                    value={form.assignedTo}
-                                    onChange={handleChange}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-gray-700 mb-1">Date</label>
-                                <input
-                                    type="date"
-                                    name="date"
-                                    value={form.date}
-                                    onChange={handleChange}
-                                    className="w-full border px-3 py-2 rounded text-black"
-                                />
-                            </div>
-
-                            <div>
                                 <label className="block text-gray-700 mb-1">Status</label>
                                 <select
-                                    name="status"
-                                    value={form.status}
+                                    name="cleaningStatus"
+                                    value={form.cleaningStatus}
                                     onChange={handleChange}
                                     className="w-full border px-3 py-2 rounded text-black"
                                 >
@@ -103,8 +112,9 @@ const AddNewTask = () => {
                     </div>
                 </div>
             </div>
+            <Toaster position="top-center" reverseOrder={false} />
         </>
-    )
-}
+    );
+};
 
-export default AddNewTask
+export default AddNewTask;

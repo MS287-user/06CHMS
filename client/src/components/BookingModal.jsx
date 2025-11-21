@@ -1,90 +1,201 @@
-import React from 'react'
+import { useState, useEffect } from "react";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
-const BookingModal = ({ open, setOpen, handleSubmit, countries }) => {
-    if (!open) return null;
-    return (
-        <>
-            <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-                <div className="bg-white w-[90%] max-w-3xl p-6 rounded-xl shadow-xl">
+const BookingModal = ({ open, setOpen, countries }) => {
+  const [roomsData, setRoomsData] = useState([]);
+  const [guestData, setGuestData] = useState([]);
+  const [guestId, setGuestId] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [checkInDate, setCheckInDate] = useState("");
+  const [checkOutDate, setCheckOutDate] = useState("");
+  const [totalPrice, setTotalPrice] = useState("");
 
-                    {/* Header */}
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold">RESERVATION</h3>
-                        <button onClick={() => setOpen(false)} className="text-red-500 text-2xl">&times;</button>
-                    </div>
+  const today = new Date().toISOString().split("T")[0];
 
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/getroom");
+        setRoomsData(response.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
-                        {/* Guest Info */}
-                        <div>
-                            <h4 className="font-semibold mb-2">Guest Information</h4>
+    const fetchGuest = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/getguest");
+        setGuestData(response.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
-                            <input name="Name" type="text" placeholder="Enter Full Name"
-                                className="w-full border p-2 rounded mb-2" />
+    fetchRooms();
+    fetchGuest();
+  }, []);
 
-                            <input name="Email" type="email" placeholder="Enter Email"
-                                className="w-full border p-2 rounded mb-2" />
+  useEffect(() => {
+    if (!roomId || !checkInDate || !checkOutDate || roomsData.length === 0) return;
 
-                            <select name="Country" className="w-full border p-2 rounded mb-2">
-                                <option>Select your country</option>
-                                {countries.map((c) => (
-                                    <option key={c}>{c}</option>
-                                ))}
-                            </select>
+    const selectedRoom = roomsData.find((r) => r._id === roomId);
+    if (!selectedRoom) return;
 
-                            <input name="Phone" type="text" placeholder="Enter Phone number"
-                                className="w-full border p-2 rounded mb-2" />
-                        </div>
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    const diffTime = checkOut - checkIn;
+    const nights = diffTime / (1000 * 60 * 60 * 24);
 
-                        {/* Reservation Info */}
-                        <div>
-                            <h4 className="font-semibold mb-2">Reservation Information</h4>
+    if (nights > 0) {
+      setTotalPrice((nights * Number(selectedRoom.roomPrice)).toFixed(2));
+    } else {
+      setTotalPrice("");
+    }
+  }, [roomId, checkInDate, checkOutDate, roomsData]);
 
-                            <select name="RoomType" className="w-full border p-2 rounded mb-2">
-                                <option>Type of Room</option>
-                                <option>Superior Room</option>
-                                <option>Deluxe Room</option>
-                                <option>Guest House</option>
-                                <option>Single Room</option>
-                            </select>
+  if (!open) return null;
 
-                            <select name="Bed" className="w-full border p-2 rounded mb-2">
-                                <option>Bedding Type</option>
-                                <option>Single</option>
-                                <option>Double</option>
-                                <option>Triple</option>
-                            </select>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                            <select name="NoofRoom" className="w-full border p-2 rounded mb-2">
-                                <option>No. of Room</option>
-                                <option>1</option>
-                            </select>
+    if (!guestId || !roomId || !checkInDate || !checkOutDate) {
+      toast.error("Please fill all required fields!");
+      return;
+    }
 
-                            <select name="Meal" className="w-full border p-2 rounded mb-2">
-                                <option>Meal</option>
-                                <option>Room Only</option>
-                                <option>Breakfast</option>
-                                <option>Half Board</option>
-                                <option>Full Board</option>
-                            </select>
+    try {
+      const response = await axios.post("http://localhost:3000/addreservation", {
+        guestId,
+        roomId,
+        checkInDate,
+        checkOutDate,
+        totalPrice,
+      });
 
-                            <div className="grid grid-cols-2 gap-2">
-                                <input name="cin" type="date" className="border p-2 rounded" />
-                                <input name="cout" type="date" className="border p-2 rounded" />
-                            </div>
-                        </div>
+      toast.success(response.data.message);
+      setGuestId("");
+      setRoomId("");
+      setCheckInDate("");
+      setCheckOutDate("");
+      setTotalPrice("");
+      setOpen(false);
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to create reservation.");
+    }
+  };
 
-                        <div className="col-span-full flex justify-end mt-3">
-                            <button className="px-5 py-2 bg-green-600 text-white rounded-lg">
-                                Submit
-                            </button>
-                        </div>
+  return (
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+        <div className="bg-white w-[90%] max-w-3xl p-6 rounded-xl shadow-xl">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold">RESERVATION</h3>
+            <button onClick={() => setOpen(false)} className="text-red-500 text-2xl">
+              &times;
+            </button>
+          </div>
 
-                    </form>
-                </div>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Guest Info */}
+            <div>
+              <h4 className="font-semibold mb-2">Guest Information</h4>
+              <select
+                name="guest"
+                value={guestId}
+                onChange={(e) => setGuestId(e.target.value)}
+                className="w-full border p-2 rounded mb-2"
+              >
+                <option value="" disabled>Select Guest</option>
+                {guestData.map((guest) => (
+                  <option key={guest._id} value={guest._id}>
+                    {guest.name}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                name="Email"
+                type="email"
+                placeholder="Enter Email"
+                className="w-full border p-2 rounded mb-2"
+              />
+
+              <select name="Country" className="w-full border p-2 rounded mb-2">
+                <option>Select your country</option>
+                {countries.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+
+              <input
+                name="Phone"
+                type="text"
+                placeholder="Enter Phone number"
+                className="w-full border p-2 rounded mb-2"
+              />
             </div>
-        </>
-    )
-}
 
-export default BookingModal
+            {/* Reservation Info */}
+            <div>
+              <h4 className="font-semibold mb-2">Reservation Information</h4>
+
+              <select
+                name="roomNumber"
+                value={roomId}
+                onChange={(e) => setRoomId(e.target.value)}
+                className="w-full border p-2 rounded mb-2"
+              >
+                <option value="" disabled>Select Room</option>
+                {roomsData.map((room) => (
+                  <option key={room._id} value={room._id}>
+                    {room.roomNumber} — {room.roomType} (${room.roomPrice})
+                  </option>
+                ))}
+              </select>
+
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  name="cin"
+                  type="date"
+                  min={today}
+                  value={checkInDate}
+                  onChange={(e) => setCheckInDate(e.target.value)}
+                  className="border p-2 rounded"
+                />
+                <input
+                  name="cout"
+                  type="date"
+                  min={checkInDate || today}
+                  value={checkOutDate}
+                  onChange={(e) => setCheckOutDate(e.target.value)}
+                  className="border p-2 rounded"
+                />
+              </div>
+
+              <input
+                name="totalPrice"
+                type="number"
+                value={totalPrice}
+                placeholder="Auto-calculated"
+                readOnly
+                className="w-full border p-2 rounded mt-2"
+              />
+            </div>
+
+            <div className="col-span-full flex justify-end mt-3">
+              <button type="submit" className="px-5 py-2 bg-green-600 text-white rounded-lg">
+                Submit Reservation
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <Toaster position="top-center" reverseOrder={false} />
+    </>
+  );
+};
+
+export default BookingModal;
