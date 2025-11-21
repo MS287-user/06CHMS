@@ -1,27 +1,42 @@
+import axios from 'axios';
 import React from 'react'
+import { useEffect } from 'react';
+import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
 const MyBookings = () => {
 
-    const bookings = [
-        {
-            id: 1,
-            roomNumber: "305",
-            roomType: "Deluxe Suite",
-            checkIn: "2025-12-10",
-            checkOut: "2025-12-15",
-            status: "Confirmed",
-            totalAmount: "$750",
-        },
-        {
-            id: 2,
-            roomNumber: "202",
-            roomType: "Standard",
-            checkIn: "2025-12-20",
-            checkOut: "2025-12-22",
-            status: "Checked-In",
-            totalAmount: "$210",
-        },
-    ];
+    const [reservationsData, setReservationsData] = useState([]);
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
+
+    const fetchReservationsData = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/getreservation");
+            const currentGuestBookings = response.data.filter(
+                (res) => res.guestId._id == loggedUser._id 
+            )
+            console.log(currentGuestBookings);
+            setReservationsData(currentGuestBookings);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    useEffect(() => {
+        fetchReservationsData();
+    }, [])
+
+    const handleDelete = async (id) => {
+        try {
+            const response = await axios.delete(`http://localhost:3000/deletereservation/${id}`);
+            fetchReservationsData();
+            toast.success(response.data.message);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
         <>
@@ -40,27 +55,27 @@ const MyBookings = () => {
                                         <th className="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Check-In</th>
                                         <th className="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Check-Out</th>
                                         <th className="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        <th className="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                        <th className="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Action</th>
+                                        <th className="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Total Amount</th>
+                                        {/* <th className="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Action</th> */}
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {bookings.map((b) => (
-                                        <tr key={b.id}>
-                                            <td className="px-4 py-3 text-black">{b.roomNumber}</td>
-                                            <td className="px-4 py-3 text-black">{b.roomType}</td>
-                                            <td className="px-4 py-3 text-black">{b.checkIn}</td>
-                                            <td className="px-4 py-3 text-black">{b.checkOut}</td>
-                                            <td className="px-4 py-3 text-black">{b.status}</td>
-                                            <td className="px-4 py-3 text-black">{b.totalAmount}</td>
-                                            <td className="px-4 py-3">
+                                    {reservationsData.map((res) => (
+                                        <tr key={res._id}>
+                                            <td className="px-4 py-3 text-black">{res.roomId.roomNumber}</td>
+                                            <td className="px-4 py-3 text-black">{res.roomId.roomType}</td>
+                                            <td className="px-4 py-3 text-black">{new Date(res.checkInDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-black">{new Date(res.checkOutDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-black">{res.status}</td>
+                                            <td className="px-4 py-3 text-black">{`$${res.totalPrice}`}</td>
+                                            {/* <td className="px-4 py-3">
                                                 <button
                                                     onClick={() => navigate(`/guest/bookings/${b.id}`)}
                                                     className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
                                                 >
                                                     View Details
                                                 </button>
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -69,6 +84,10 @@ const MyBookings = () => {
                     </div>
                 </div>
             </div>
+            <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
         </>
     )
 }

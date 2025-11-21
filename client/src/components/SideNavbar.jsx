@@ -64,7 +64,7 @@ const SideNavbar = ({ logoutUser }) => {
           <li>
             <Link
               to="/dashboard/guests"
-              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/staff"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/guests"
                 ? "bg-gray-200 text-gray-900 font-semibold"
                 : "text-gray-700 hover:bg-gray-100"
                 }`}
@@ -185,6 +185,18 @@ const SideNavbar = ({ logoutUser }) => {
         <ul>
           <li>
             <Link
+              to="/dashboard/staff/roomstatus"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/staff/roomstatus"
+                ? "bg-gray-200 text-gray-900 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              <CubeIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <span>Rooms Status</span>
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/dashboard/staff/reservations"
               className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/staff/reservations"
                 ? "bg-gray-200 text-gray-900 font-semibold"
@@ -205,18 +217,6 @@ const SideNavbar = ({ logoutUser }) => {
             >
               <CalendarDaysIcon className="w-5 h-5 text-gray-500 mr-2" />
               <span>Guest In / Guest Out</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/dashboard/staff/roomstatus"
-              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/staff/roomstatus"
-                ? "bg-gray-200 text-gray-900 font-semibold"
-                : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              <CubeIcon className="w-5 h-5 text-gray-500 mr-2" />
-              <span>Rooms Status</span>
             </Link>
           </li>
           <li>
@@ -259,6 +259,18 @@ const SideNavbar = ({ logoutUser }) => {
         <ul>
           <li>
             <Link
+              to="/dashboard/staff/roomstatus"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/staff/roomstatus"
+                ? "bg-gray-200 text-gray-900 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              <CubeIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <span>Rooms Status</span>
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/dashboard/housekeeping"
               className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/housekeeping"
                 ? "bg-gray-200 text-gray-900 font-semibold"
@@ -266,19 +278,19 @@ const SideNavbar = ({ logoutUser }) => {
                 }`}
             >
               <SparklesIcon className="w-5 h-5 text-gray-500 mr-2" />
-              <span>Housekeeping</span>
+              <span>Cleaning</span>
             </Link>
           </li>
           <li>
             <Link
-              to="/dashboard/maintainance"
-              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/maintainance"
+              to="/dashboard/staff/maintainancerequest"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/staff/maintainancerequest"
                 ? "bg-gray-200 text-gray-900 font-semibold"
                 : "text-gray-700 hover:bg-gray-100"
                 }`}
             >
               <UserGroupIcon className="w-5 h-5 text-gray-500 mr-2" />
-              <span>Maintenance</span>
+              <span>Maintenance Requests</span>
             </Link>
           </li>
           <li>

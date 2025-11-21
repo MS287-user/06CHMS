@@ -160,7 +160,9 @@ const Staff = () => {
                                             {/* Status */}
                                             <td className="px-4 py-3">
                                                 {
-                                                    staff._id == editId ?
+                                                    staff._id == editId && loggedUser.role == "Manager" && staff.role == "Manager" ? staff.status
+                                                        :
+                                                        staff._id == editId ?
                                                         <select
                                                             name="status"
                                                             className="w-full border px-3 py-2 rounded text-black bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
@@ -176,7 +178,7 @@ const Staff = () => {
                                                 }
                                             </td>
                                             {/* Action */}
-                                            <td className="px-4 py-3 text-center space-x-2">
+                                            <td className="px-4 py-3 text-center flex justify-start gap-2.5">
                                                 {
                                                     staff._id == editId ?
                                                         // Save and Cancel Buttons
@@ -197,25 +199,23 @@ const Staff = () => {
                                                         :
                                                         // Edit and Delete Buttons
                                                         <>
-                                                            {loggedUser.role == "Manager" && staff.role == "Admin" ?
-                                                                "" : loggedUser.role == "Admin" && staff.role == "Admin" ?
-                                                                    "" : loggedUser.role == "Manager" && staff.role == "Manager" ?
-                                                                    ""
-                                                                    :
-                                                                    <>
-                                                                        <button
-                                                                            className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                                                                            onClick={() => handleEdit(staff)}
-                                                                        >
-                                                                            Edit
-                                                                        </button>
-                                                                        <button
-                                                                            className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                                                                            onClick={() => handleDelete(staff._id)}
-                                                                        >
-                                                                            Delete
-                                                                        </button>
-                                                                    </>}
+
+                                                            <button
+                                                                className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                                                                onClick={() => handleEdit(staff)}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            {loggedUser.role == "Manager" && staff.role == "Manager" ?
+                                                                ""
+                                                                :
+                                                                <button
+                                                                    className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                                                                    onClick={() => handleDelete(staff._id)}
+                                                                >
+                                                                    Delete
+                                                                </button>
+                                                            }
                                                         </>
                                                 }
 

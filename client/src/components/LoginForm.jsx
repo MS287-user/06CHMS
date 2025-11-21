@@ -25,6 +25,9 @@ const LoginForm = ({ loginUser }) => {
       if(response.data.registeredUser.role == "Guest"){
         navigate("/");
       }
+      else if(response.data.registeredUser.role == "Receptionist" || response.data.registeredUser.role == "Housekeeper"){
+        navigate("/dashboard/staff/roomstatus");
+      }
       else{
         navigate("/dashboard");
       }

@@ -9,6 +9,7 @@ const staffUsers = require("./models/usermodel");
 const room = require("./models/roomModel");
 const booking = require("./models/bookingmodel");
 const guest = require("./models/guestmodel");
+const maintenance = require("./models/maintenance");
 
 app.use(express.json());
 app.use(cors());
@@ -182,7 +183,7 @@ app.post("/addreservation", async (req, resp) => {
         const { guestId, roomId, checkInDate, checkOutDate, totalPrice } = req.body;
         await booking.insertOne({ guestId, roomId, checkInDate, checkOutDate, totalPrice });
         const selectedRoom = await room.findOne({ _id: roomId });
-        if(selectedRoom) {
+        if (selectedRoom) {
             selectedRoom.roomStatus = "Reserved";
             await selectedRoom.save();
         }
@@ -216,6 +217,18 @@ app.get("/getreservation/:id", async (req, resp) => {
     }
 })
 
+// Getting Reservation By Guest Id
+app.get("/getreservationbyguest/:id", async (req, resp) => {
+    try {
+        const id = req.params.id;
+        const reservationData = await booking.find({ guestId: id }).populate('guestId').populate('roomId');
+        resp.status(200).send(reservationData);
+    }
+    catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+})
+
 // Update Reservation
 app.put("/updatereservation/:id", async (req, resp) => {
     try {
@@ -223,19 +236,6 @@ app.put("/updatereservation/:id", async (req, resp) => {
         const { updateRoomId, editCheckInDate, editCheckOutDate, totalPrice } = req.body;
 
         await booking.updateOne({ _id: id }, { $set: { roomId: updateRoomId, checkInDate: editCheckInDate, checkOutDate: editCheckOutDate, totalPrice } });
-
-        // const selectedRoom = await room.findOne({ _id: updateRoomId });
-
-        // if (selectedRoom) {
-        //     if (editBookingStatus == "Checked-In") {
-        //         selectedRoom.roomStatus = "Occupied";
-        //         await selectedRoom.save();
-        //     }
-        //     else if (editBookingStatus == "Checked-Out") {
-        //         selectedRoom.roomStatus = "Cleaning";
-        //         await selectedRoom.save();
-        //     }
-        // }
 
         resp.status(200).send({ message: "Reservation Updated" });
     }
@@ -273,8 +273,18 @@ app.delete("/deletereservation/:id", async (req, resp) => {
 app.put("/reservationstatuscheckedin/:id", async (req, resp) => {
     try {
         const id = req.params.id;
-        
+
         await booking.updateOne({ _id: id }, { $set: { status: "Checked-In" } });
+
+        const selectedBooking = await booking.findOne({ _id: id });
+
+        const selectedRoomId = selectedBooking.roomId;
+
+        if (selectedRoomId) {
+            const selectedRoom = await room.findOne({ _id: selectedRoomId });
+            selectedRoom.roomStatus = "Occupied";
+            await selectedRoom.save();
+        }
 
         resp.status(200).send({ message: "Guest Checked-In" });
     }
@@ -287,10 +297,128 @@ app.put("/reservationstatuscheckedin/:id", async (req, resp) => {
 app.put("/reservationstatuscheckedout/:id", async (req, resp) => {
     try {
         const id = req.params.id;
-        
+
         await booking.updateOne({ _id: id }, { $set: { status: "Checked-Out" } });
 
+        const selectedBooking = await booking.findOne({ _id: id });
+
+        const selectedRoomId = selectedBooking.roomId;
+
+        if (selectedRoomId) {
+            const selectedRoom = await room.findOne({ _id: selectedRoomId });
+            selectedRoom.roomStatus = "Available";
+            await selectedRoom.save();
+        }
+
         resp.status(200).send({ message: "Guest Checked-Out" });
+    }
+    catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+})
+
+// Add Maintenance
+app.post("/addmaintenance", async (req, resp) => {
+    try {
+        const { guestId, roomId, issue, resolveStatus, reportedDate } = req.body;
+        await maintenance.insertOne({ guestId, roomId, issue, resolveStatus, reportedDate });
+        const selectedRoom = await room.findOne({ _id: roomId });
+        if (selectedRoom) {
+            selectedRoom.roomStatus = "Maintenance";
+            await selectedRoom.save();
+        }
+        resp.status(200).send({ message: "Maintenance Request Added" })
+    }
+    catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+})
+
+// Get Maintenance
+app.get("/getmaintenance", async (req, resp) => {
+    try {
+        const maintenanceData = await maintenance.find().populate('guestId').populate('roomId');
+        resp.status(200).send(maintenanceData);
+    }
+    catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+})
+
+// Update Maintenance
+app.put("/updatemaintenance/:id", async (req, resp) => {
+    try {
+        const id = req.params.id;
+        const { editResolveStatus } = req.body;
+
+        await maintenance.updateOne({ _id: id }, { $set: { resolveStatus: editResolveStatus } });
+        const selectedMaintenance = await maintenance.findOne({ _id: id });
+
+        if (selectedMaintenance) {
+            const selectedMaintenanceRoomId = selectedMaintenance.roomId;
+            if (selectedMaintenance.resolveStatus == "Pending") {
+                const selectedRoom = await room.findOne({ _id: selectedMaintenanceRoomId });
+                if (selectedRoom) {
+                    selectedRoom.roomStatus = "Maintenance";
+                    await selectedRoom.save();
+                }
+            }
+            if (selectedMaintenance.resolveStatus == "In Progress") {
+                const selectedRoom = await room.findOne({ _id: selectedMaintenanceRoomId });
+                if (selectedRoom) {
+                    selectedRoom.roomStatus = "Maintenance";
+                    await selectedRoom.save();
+                }
+            }
+            else if (selectedMaintenance.resolveStatus == "Resolved") {
+                const selectedBooking = await booking.findOne({ roomId: selectedMaintenanceRoomId });
+                if (selectedBooking.status == "Checked-In") {
+                    const selectedRoom = await room.findOne({ _id: selectedMaintenanceRoomId });
+                    if (selectedRoom) {
+                        selectedRoom.roomStatus = "Occupied";
+                        await selectedRoom.save();
+                    }
+                }
+                else{
+                    const selectedRoom = await room.findOne({ _id: selectedMaintenanceRoomId });
+                    if (selectedRoom) {
+                        selectedRoom.roomStatus = "Available";
+                        await selectedRoom.save();
+                    }
+                }
+
+            }
+
+        }
+
+
+
+        resp.status(200).send({ message: "Maintenance Status Updated" });
+    }
+    catch (err) {
+        resp.status(404).send({ message: err.message });
+    }
+})
+
+// Delete Maintenance
+app.delete("/deletemaintenance/:id", async (req, resp) => {
+
+    try {
+        const id = req.params.id;
+
+        // const selectedMaintenance = await maintenance.findOne({ _id: id });
+
+        // if (selectedMaintenance) {
+        //     const selectedMaintenanceRoomId = selectedMaintenance.roomId;
+        //     const selectedRoom = await room.findOne({ _id: selectedMaintenanceRoomId });
+        //     if (selectedRoom) {
+        //         selectedRoom.roomStatus = "Available";
+        //         await selectedRoom.save();
+        //     }
+        // }
+        await maintenance.deleteOne({ _id: id });
+
+        resp.status(200).send({ message: "Maintenance Request Deleted" });
     }
     catch (err) {
         resp.status(404).send({ message: err.message });
@@ -324,7 +452,7 @@ app.post("/login", async (req, resp) => {
                 resp.status(400).send({ message: "Incorrect password" });
             }
         }
-        else{
+        else {
             const registeredUser = await guest.findOne({ email: email });
             if (!registeredUser) {
                 return resp.status(404).send({ message: "User not found" });

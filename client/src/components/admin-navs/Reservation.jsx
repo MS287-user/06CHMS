@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const Reservation = () => {
 
-    const [reservationsData, setReservationsData] = useState([]) ;
+    const [reservationsData, setReservationsData] = useState([]);
 
     const fetchReservationsData = async () => {
             try {

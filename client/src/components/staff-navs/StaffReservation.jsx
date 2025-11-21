@@ -1,25 +1,37 @@
-import React from 'react'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 const StaffReservation = () => {
 
-    const staffReservations = [
-        {
-            id: 1,
-            guestName: "John Doe",
-            roomNumber: "202",
-            checkIn: "2025-11-05",
-            checkOut: "2025-11-10",
-            status: "Reserved",
-        },
-        {
-            id: 2,
-            guestName: "Jane Smith",
-            roomNumber: "307",
-            checkIn: "2025-11-07",
-            checkOut: "2025-11-12",
-            status: "Checked-In",
-        },
-    ];
+    const [reservationsData, setReservationsData] = useState([]);
+
+    const fetchReservationsData = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/getreservation");
+            console.log(response.data);
+            setReservationsData(response.data);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    useEffect(() => {
+        fetchReservationsData();
+    }, [])
+
+    const handleDelete = async (id) => {
+        try {
+            const response = await axios.delete(`http://localhost:3000/deletereservation/${id}`);
+            fetchReservationsData();
+            toast.success(response.data.message);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
         <>
@@ -27,36 +39,60 @@ const StaffReservation = () => {
                 <div className="max-w-5xl mx-auto bg-white shadow rounded-lg overflow-hidden">
                     <div className="px-6 py-4 border-b">
                         <h1 className="text-2xl font-semibold text-gray-800">
-                            Staff — Reservations
+                            Reservations
                         </h1>
                     </div>
                     <div className="px-6 py-4">
+                        <Link
+                            to="/dashboard/reservation/addreservation"
+                            className="inline-block mb-4 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded"
+                        >
+                            Add New Reservation
+                        </Link>
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Guest Name</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Room #</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Check-In</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Check-Out</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Action</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Guest Name
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Room Number
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Check-In
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Check-Out
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Total Price
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Status
+                                        </th>
+                                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {staffReservations.map((res) => (
-                                        <tr key={res.id}>
-                                            <td className="px-4 py-3 text-black">{res.guestName}</td>
-                                            <td className="px-4 py-3 text-black">{res.roomNumber}</td>
-                                            <td className="px-4 py-3 text-black">{res.checkIn}</td>
-                                            <td className="px-4 py-3 text-black">{res.checkOut}</td>
+                                    {reservationsData.map((res) => (
+                                        <tr key={res._id}>
+                                            <td className="px-4 py-3 text-black">{res.guestId.name}</td>
+                                            <td className="px-4 py-3 text-black">{res.roomId.roomNumber}</td>
+                                            <td className="px-4 py-3 text-black">{new Date(res.checkInDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-black">{new Date(res.checkOutDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-black">{`$${res.totalPrice}`}</td>
                                             <td className="px-4 py-3 text-black">{res.status}</td>
-                                            <td className="px-4 py-3 text-center">
-                                                <button
-                                                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                                                    onClick={() => navigate(`/staff/reservations/${res.id}`)}
-                                                >
-                                                    View Details
+                                            <td className="px-4 py-3 text-center space-x-2">
+                                                <Link
+                                                    to={`/dashboard/reservation/editreservation/${res._id}`}
+                                                    className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+                                                    Edit
+                                                </Link>
+                                                <button onClick={() => handleDelete(res._id)} className="inline-block bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+                                                    Delete
                                                 </button>
                                             </td>
                                         </tr>
@@ -67,6 +103,10 @@ const StaffReservation = () => {
                     </div>
                 </div>
             </div>
+            <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
         </>
     )
 }
