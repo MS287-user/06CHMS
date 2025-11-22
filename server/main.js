@@ -409,16 +409,6 @@ app.delete("/deletemaintenance/:id", async (req, resp) => {
     try {
         const id = req.params.id;
 
-        // const selectedMaintenance = await maintenance.findOne({ _id: id });
-
-        // if (selectedMaintenance) {
-        //     const selectedMaintenanceRoomId = selectedMaintenance.roomId;
-        //     const selectedRoom = await room.findOne({ _id: selectedMaintenanceRoomId });
-        //     if (selectedRoom) {
-        //         selectedRoom.roomStatus = "Available";
-        //         await selectedRoom.save();
-        //     }
-        // }
         await maintenance.deleteOne({ _id: id });
 
         resp.status(200).send({ message: "Maintenance Request Deleted" });

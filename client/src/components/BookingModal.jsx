@@ -2,38 +2,28 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
-const BookingModal = ({ open, setOpen, countries }) => {
+const BookingModal = ({ open, setOpen }) => {
   const [roomsData, setRoomsData] = useState([]);
-  const [guestData, setGuestData] = useState([]);
   const [guestId, setGuestId] = useState("");
   const [roomId, setRoomId] = useState("");
   const [checkInDate, setCheckInDate] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
   const [totalPrice, setTotalPrice] = useState("");
+  const loggedUser = JSON.parse(localStorage.getItem("user"));
 
   const today = new Date().toISOString().split("T")[0];
 
+  const fetchRooms = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/getroom");
+      setRoomsData(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/getroom");
-        setRoomsData(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    const fetchGuest = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/getguest");
-        setGuestData(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
     fetchRooms();
-    fetchGuest();
   }, []);
 
   useEffect(() => {
@@ -58,32 +48,41 @@ const BookingModal = ({ open, setOpen, countries }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setGuestId(loggedUser._id);
+    if (loggedUser.role == "Guest") {
 
-    if (!guestId || !roomId || !checkInDate || !checkOutDate) {
-      toast.error("Please fill all required fields!");
-      return;
+      if (!roomId || !checkInDate || !checkOutDate) {
+        toast.error("Please fill all required fields!");
+        return;
+      }
+
+      try {
+        const response = await axios.post("http://localhost:3000/addreservation", {
+          guestId,
+          roomId,
+          checkInDate,
+          checkOutDate,
+          totalPrice,
+        });
+
+        toast.success(response.data.message);
+        setGuestId("");
+        setRoomId("");
+        setCheckInDate("");
+        setCheckOutDate("");
+        setTotalPrice("");
+        setOpen(false);
+        toast.error(response.data.message);
+      } 
+      catch (err) {
+        toast.error(err.response.data.message);
+      }
+
+    }
+    else {
+      toast.error("Only Guests can fill reservation form");
     }
 
-    try {
-      const response = await axios.post("http://localhost:3000/addreservation", {
-        guestId,
-        roomId,
-        checkInDate,
-        checkOutDate,
-        totalPrice,
-      });
-
-      toast.success(response.data.message);
-      setGuestId("");
-      setRoomId("");
-      setCheckInDate("");
-      setCheckOutDate("");
-      setTotalPrice("");
-      setOpen(false);
-    } catch (err) {
-      console.log(err);
-      toast.error("Failed to create reservation.");
-    }
   };
 
   return (
@@ -91,56 +90,15 @@ const BookingModal = ({ open, setOpen, countries }) => {
       <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
         <div className="bg-white w-[90%] max-w-3xl p-6 rounded-xl shadow-xl">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold">RESERVATION</h3>
+            <h3 className="text-xl font-bold">GUEST RESERVATION</h3>
             <button onClick={() => setOpen(false)} className="text-red-500 text-2xl">
               &times;
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Guest Info */}
-            <div>
-              <h4 className="font-semibold mb-2">Guest Information</h4>
-              <select
-                name="guest"
-                value={guestId}
-                onChange={(e) => setGuestId(e.target.value)}
-                className="w-full border p-2 rounded mb-2"
-              >
-                <option value="" disabled>Select Guest</option>
-                {guestData.map((guest) => (
-                  <option key={guest._id} value={guest._id}>
-                    {guest.name}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                name="Email"
-                type="email"
-                placeholder="Enter Email"
-                className="w-full border p-2 rounded mb-2"
-              />
-
-              <select name="Country" className="w-full border p-2 rounded mb-2">
-                <option>Select your country</option>
-                {countries.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-
-              <input
-                name="Phone"
-                type="text"
-                placeholder="Enter Phone number"
-                className="w-full border p-2 rounded mb-2"
-              />
-            </div>
-
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-1 gap-6">
             {/* Reservation Info */}
             <div>
-              <h4 className="font-semibold mb-2">Reservation Information</h4>
-
               <select
                 name="roomNumber"
                 value={roomId}

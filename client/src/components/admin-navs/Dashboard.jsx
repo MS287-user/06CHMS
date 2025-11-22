@@ -1,6 +1,56 @@
-import React from 'react'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
 
 const Dashboard = () => {
+    const [staffData, setStaffData] = useState([]);
+    const [roomsData, setRoomsData] = useState([]);
+    const [checkedIn, setCheckedIn] = useState([]);
+    const [availableRooms, setAvailableRooms] = useState([]);
+
+    const fetchStaff = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/getstaff");
+            setStaffData(response.data);
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    const fetchReservationsData = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/getreservation");
+            // console.log(response.data);
+            const checkedInReservations = response.data.filter(
+            (res) => res.status == "Checked-In"
+        )
+        setCheckedIn(checkedInReservations)
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    const fetchRooms = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/getroom");
+            // console.log(response.data);
+            setRoomsData(response.data);
+            const availableRooms = response.data.filter(
+            (room) => room.roomStatus == "Available"
+        )
+        setAvailableRooms(availableRooms)
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    useEffect(() => {
+        fetchStaff();
+        fetchReservationsData();
+        fetchRooms();
+    }, [])
 
     const data = {
         totalRooms: 120,
@@ -19,38 +69,39 @@ const Dashboard = () => {
                     {/* Total Rooms */}
                     <div className="bg-white shadow rounded-lg p-4">
                         <h2 className="text-sm font-medium text-gray-500 uppercase">Total Rooms</h2>
-                        <p className="mt-2 text-3xl font-bold text-black">{data.totalRooms}</p>
+                        <p className="mt-2 text-3xl font-bold text-black">{roomsData.length}</p>
                     </div>
 
                     {/* Checked In Rooms */}
                     <div className="bg-white shadow rounded-lg p-4">
                         <h2 className="text-sm font-medium text-gray-500 uppercase">Checked-In Rooms</h2>
-                        <p className="mt-2 text-3xl font-bold text-black">{data.checkedIn}</p>
+                        <p className="mt-2 text-3xl font-bold text-black">{checkedIn.length}</p>
                     </div>
 
                     {/* Empty Rooms */}
                     <div className="bg-white shadow rounded-lg p-4">
                         <h2 className="text-sm font-medium text-gray-500 uppercase">Empty Rooms</h2>
-                        <p className="mt-2 text-3xl font-bold text-black">{data.emptyRooms}</p>
+                        <p className="mt-2 text-3xl font-bold text-black">{availableRooms.length}</p>
                     </div>
 
                     {/* Total Staff */}
                     <div className="bg-white shadow rounded-lg p-4">
                         <h2 className="text-sm font-medium text-gray-500 uppercase">Total Staff</h2>
-                        <p className="mt-2 text-3xl font-bold text-black">{data.totalStaff}</p>
+                        <p className="mt-2 text-3xl font-bold text-black">{staffData.length}</p>
                     </div>
 
                     {/* Reservations Today */}
-                    <div className="bg-white shadow rounded-lg p-4">
+                    {/* <div className="bg-white shadow rounded-lg p-4">
                         <h2 className="text-sm font-medium text-gray-500 uppercase">Reservations Today</h2>
                         <p className="mt-2 text-3xl font-bold text-black">{data.reservationsToday}</p>
-                    </div>
+                    </div> */}
 
                     {/* Occupancy Rate */}
-                    <div className="bg-white shadow rounded-lg p-4">
+                    {/* <div className="bg-white shadow rounded-lg p-4">
                         <h2 className="text-sm font-medium text-gray-500 uppercase">Occupancy Rate</h2>
                         <p className="mt-2 text-3xl font-bold text-black">{data.occupancyRate}</p>
-                    </div>
+                    </div> */}
+
                 </div>
             </div>
         </>

@@ -121,6 +121,7 @@ const SideNavbar = ({ logoutUser }) => {
               <span>Billing</span>
             </Link>
           </li>
+          {/*
           <li>
             <Link
               to="/dashboard/housekeeping"
@@ -169,6 +170,7 @@ const SideNavbar = ({ logoutUser }) => {
               <span>Settings</span>
             </Link>
           </li>
+          */}
         </ul>
       </div>
 
@@ -183,6 +185,18 @@ const SideNavbar = ({ logoutUser }) => {
           RECEPTIONIST
         </h2>
         <ul>
+          <li>
+            <Link
+              to="/dashboard"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard"
+                ? "bg-gray-200 text-gray-900 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              <ChartBarIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <span>Dashboard</span>
+            </Link>
+          </li>
           <li>
             <Link
               to="/dashboard/staff/roomstatus"
@@ -257,6 +271,18 @@ const SideNavbar = ({ logoutUser }) => {
           Housekeeper
         </h2>
         <ul>
+          <li>
+            <Link
+              to="/dashboard"
+              className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard"
+                ? "bg-gray-200 text-gray-900 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              <ChartBarIcon className="w-5 h-5 text-gray-500 mr-2" />
+              <span>Dashboard</span>
+            </Link>
+          </li>
           <li>
             <Link
               to="/dashboard/staff/roomstatus"
@@ -343,7 +369,8 @@ const SideNavbar = ({ logoutUser }) => {
               <span>Profile</span>
             </Link>
           </li>
-          <li>
+
+          {/* <li>
             <Link
               to="/dashboard/guest/feedback"
               className={`flex items-center px-2 py-2 rounded-md text-sm ${location.pathname === "/dashboard/guest/feedback"
@@ -366,7 +393,8 @@ const SideNavbar = ({ logoutUser }) => {
               <ChatBubbleLeftEllipsisIcon className="w-5 h-5 text-gray-500 mr-2" />
               <span>Services Request</span>
             </Link>
-          </li>
+          </li> */}
+
         </ul>
       </div>
 
